@@ -7,9 +7,9 @@
 <style>
   /* ------------------------------------------------------------------
      Harness Engagement Hub — MVP mockup
-     Rebalanced layout: Feature Feed no longer dominates. All four
-     pillars (Feature Feed, Tickets, Quarter Timeline, Agent SME) live
-     in an equal-weight bento grid.
+     Three pillars in an equal-weight bento grid: Feature Feed,
+     My Tickets, and Ask AI (Harness's global assistant, extended with
+     feature-feed + feature-request tools). Quarter Timeline removed.
      ------------------------------------------------------------------ */
 
   :root {
@@ -153,6 +153,12 @@
     background: var(--hn-ink); color: #fff; font-size: 12.5px; font-weight: 600;
     padding: 6px 14px; border-radius: 20px;
   }
+  .topbar .askai-pill {
+    display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+    font-size: 12.5px; font-weight: 600; color: var(--hn-purple);
+    background: #f4f0ff; border: 1px solid #ddd0fb; border-radius: 20px; padding: 5px 12px;
+  }
+  .topbar .askai-pill:hover { background: #ece4ff; }
   .topbar .whatsnew { font-size: 13px; color: var(--hn-ink-2); position: relative; }
   .topbar .whatsnew::after {
     content: ""; position: absolute; top: -2px; right: -8px; width: 6px; height: 6px;
@@ -192,7 +198,7 @@
 
   /* ---- pillar quick-stat strip ---- */
   .kpis {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 18px;
   }
   .kpi {
     background: var(--hn-surface); border: 1px solid var(--hn-border); border-radius: var(--radius);
@@ -212,8 +218,7 @@
   /* ============================ BENTO GRID ============================ */
   .bento {
     display: grid;
-    grid-template-columns: 1.35fr 1fr 1.15fr;
-    grid-template-rows: auto auto;
+    grid-template-columns: 1.3fr 1fr 1.25fr;
     gap: 16px;
     align-items: start;
   }
@@ -233,8 +238,8 @@
   .mini-link { font-size: 12px; color: var(--hn-primary); text-decoration: none; font-weight: 600; }
   .collapse { color: var(--hn-ink-3); cursor: pointer; font-size: 13px; }
 
-  /* -- Feature Feed occupies the tall left column -- */
-  .feed { grid-column: 1; grid-row: 1 / span 2; }
+  /* -- Feature Feed occupies the left column -- */
+  .feed { grid-column: 1; }
   .feed-filters {
     display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
     padding: 11px 16px; border-bottom: 1px solid var(--hn-border); background: #fafbfc;
@@ -277,6 +282,38 @@
   .feed-foot { padding: 11px 16px; text-align: center; }
   .feed-foot .count { font-size: 11.5px; color: var(--hn-ink-3); margin-bottom: 8px; }
 
+  /* -- attached YouTube video preview on a feature -- */
+  .f-video {
+    display: block; margin: 6px 0 12px; width: 100%;
+    border: 1px solid var(--hn-border); border-radius: 10px; overflow: hidden; text-decoration: none;
+    box-shadow: var(--hn-shadow-lg);
+  }
+  .f-video-thumb {
+    position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: #000;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .f-video-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .f-video-thumb::after {
+    content: ""; position: absolute; inset: 0; background: rgba(0,0,0,.12); transition: background .15s ease;
+  }
+  .f-video:hover .f-video-thumb::after { background: rgba(0,0,0,.04); }
+  .yt-play {
+    position: relative; z-index: 1;
+    width: 68px; height: 48px; border-radius: 12px; background: #ff0000; color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.5); transition: transform .15s ease, background .15s ease;
+  }
+  .f-video:hover .yt-play { background: #e60000; transform: scale(1.08); }
+  .yt-dur {
+    position: absolute; z-index: 1; bottom: 10px; right: 10px;
+    background: rgba(0,0,0,.82); color: #fff; font-size: 11.5px; font-weight: 600;
+    padding: 2px 6px; border-radius: 4px;
+  }
+  .f-video-meta { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #fff; }
+  .f-video-meta .yt-ic { color: #ff0000; font-size: 18px; flex-shrink: 0; }
+  .f-video-meta .yt-title { font-size: 13px; font-weight: 650; color: var(--hn-ink); line-height: 1.3; }
+  .f-video-meta .yt-sub { font-size: 11px; color: var(--hn-ink-3); }
+
   /* -- My Tickets (row 1, middle) -- elevated from kebab menu -- */
   .tickets { grid-column: 2; grid-row: 1; }
   .ticket {
@@ -308,34 +345,9 @@
   }
   .linkchip.jira { color: #1666c1; border-color: #bcd8f7; background: #f2f8ff; }
 
-  /* -- Quarter Timeline (row 2, middle) -- */
-  .timeline { grid-column: 2; grid-row: 2; }
-  .q-switch {
-    display: flex; align-items: center; justify-content: center; gap: 12px;
-    padding: 10px 16px; border-bottom: 1px solid var(--hn-border); background: #fafbfc;
-  }
-  .q-switch .arrow { color: var(--hn-ink-3); cursor: pointer; font-size: 13px; padding: 2px 6px; }
-  .q-switch .q-label { font-size: 13px; font-weight: 700; }
-  .tl { padding: 6px 16px 12px; }
-  .tl-row { display: flex; gap: 12px; padding: 9px 0; position: relative; }
-  .tl-rail { position: relative; width: 12px; flex-shrink: 0; }
-  .tl-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--hn-primary); border: 2px solid #fff; box-shadow: 0 0 0 1px var(--hn-primary); margin-top: 4px; }
-  .tl-rail::before {
-    content: ""; position: absolute; left: 4px; top: 14px; bottom: -12px; width: 2px; background: var(--hn-border-strong);
-  }
-  .tl-row:last-child .tl-rail::before { display: none; }
-  .tl-main { flex: 1; }
-  .tl-date { font-size: 12px; font-weight: 700; }
-  .tl-badges { display: flex; gap: 6px; margin: 3px 0 4px; }
-  .tl-badge { font-size: 10px; font-weight: 600; color: var(--hn-ink-2); background: #f0f3f7; border-radius: 5px; padding: 1px 6px; }
-  .tl-badge.tk { background: #e7f1fd; color: var(--hn-improved-ink); }
-  .tl-item { font-size: 12px; color: var(--hn-ink-2); display: flex; gap: 6px; }
-  .tl-item::before { content: "•"; color: var(--hn-primary); }
-  .tl-foot { padding: 0 16px 14px; }
-
-  /* -- Agent SME (tall right column) -- the differentiator, emphasized -- */
+  /* -- Ask AI (right column) -- Harness's global assistant, extended -- */
   .sme {
-    grid-column: 3; grid-row: 1 / span 2;
+    grid-column: 3;
     border: 1px solid #d7ccfb;
     box-shadow: 0 4px 18px rgba(105,56,239,.10);
   }
@@ -378,6 +390,39 @@
     border-radius: 20px; padding: 5px 11px; cursor: pointer;
   }
   .suggest .s:hover { border-color: var(--hn-purple); color: var(--hn-purple); }
+
+  /* ---- in-chat "suggested feature request" card (tool call) ---- */
+  .fr-card {
+    margin-top: 10px; border: 1px solid #d7ccfb; border-radius: 10px;
+    background: #fbfaff; overflow: hidden;
+  }
+  .fr-card .fr-head {
+    display: flex; align-items: center; gap: 7px; padding: 8px 11px;
+    background: linear-gradient(90deg, #f0e9ff, #fbfaff); border-bottom: 1px solid #e6def9;
+    font-size: 10.5px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--hn-purple);
+  }
+  .fr-card .fr-head .tool { margin-left: auto; font-size: 9.5px; color: var(--hn-ink-3); background: #fff; border: 1px solid #e6def9; padding: 1px 6px; border-radius: 5px; text-transform: none; letter-spacing: 0; }
+  .fr-card .fr-fields { padding: 10px 12px; display: flex; flex-direction: column; gap: 7px; }
+  .fr-row { font-size: 12px; }
+  .fr-row .lbl { color: var(--hn-ink-3); font-weight: 600; display: block; margin-bottom: 1px; font-size: 10.5px; text-transform: uppercase; letter-spacing: .03em; }
+  .fr-row .val { color: var(--hn-ink); }
+  .fr-row .val.title { font-weight: 650; }
+  .fr-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .fr-actions { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid #e6def9; }
+  .fr-btn {
+    flex: 1; text-align: center; font-size: 12px; font-weight: 650; padding: 8px; border-radius: 7px;
+    cursor: pointer; border: 1px solid transparent;
+  }
+  .fr-btn.approve { background: var(--hn-purple); color: #fff; }
+  .fr-btn.approve:hover { background: #5a2fd6; }
+  .fr-btn.edit { background: #fff; color: var(--hn-ink); border-color: var(--hn-border-strong); flex: 0 0 auto; padding: 8px 12px; }
+  .fr-btn.deny { background: #fff; color: var(--hn-ink-2); border-color: var(--hn-border-strong); flex: 0 0 auto; padding: 8px 12px; }
+  .fr-btn.deny:hover { border-color: #e5484d; color: #e5484d; }
+  .fr-created { display: none; padding: 10px 12px; font-size: 12px; color: var(--hn-new-ink); background: var(--hn-new); border-top: 1px solid #cceedb; }
+  .fr-card.done .fr-actions { display: none; }
+  .fr-card.done .fr-created { display: block; }
+  .fr-card.denied { opacity: .55; }
+  .fr-card.denied .fr-actions { display: none; }
   .sme-input {
     display: flex; align-items: center; gap: 9px; padding: 12px 16px;
     border-top: 1px solid var(--hn-border);
@@ -399,13 +444,12 @@
     padding: 11px; cursor: pointer; border-top: 1px dashed var(--hn-border-strong);
   }
 
-  /* ---- collapsed Agent SME: reflow grid so other cards get the space ---- */
+  /* ---- collapsed Ask AI: reflow grid so other cards get the space ---- */
   .collapse { transition: transform .15s ease; }
   .bento.sme-collapsed { grid-template-columns: 1.5fr 1fr; }
-  .bento.sme-collapsed .feed     { grid-column: 1; grid-row: 1 / span 2; }
-  .bento.sme-collapsed .tickets  { grid-column: 2; grid-row: 1; }
-  .bento.sme-collapsed .timeline { grid-column: 2; grid-row: 2; }
-  /* collapsed SME leaves the grid and becomes a floating chat bubble */
+  .bento.sme-collapsed .feed    { grid-column: 1; }
+  .bento.sme-collapsed .tickets { grid-column: 2; }
+  /* collapsed Ask AI leaves the grid and becomes a floating chat bubble */
   .bento.sme-collapsed .sme {
     position: fixed; bottom: 26px; right: 26px; z-index: 90;
     width: 58px; height: 58px; border-radius: 50%;
@@ -477,15 +521,14 @@
 
   @media (max-width: 1180px) {
     .bento { grid-template-columns: 1fr 1fr; }
-    .feed { grid-column: 1 / span 2; grid-row: 1; }
-    .tickets { grid-column: 1; grid-row: 2; }
-    .timeline { grid-column: 2; grid-row: 2; }
-    .sme { grid-column: 1 / span 2; grid-row: 3; }
+    .feed { grid-column: 1; grid-row: 1; }
+    .tickets { grid-column: 2; grid-row: 1; }
+    .sme { grid-column: 1 / span 2; grid-row: 2; }
   }
   @media (max-width: 720px) {
     .sidebar { display: none; }
     .kpis, .bento { grid-template-columns: 1fr; }
-    .feed, .tickets, .timeline, .sme { grid-column: 1 !important; grid-row: auto !important; }
+    .feed, .tickets, .sme { grid-column: 1 !important; grid-row: auto !important; }
   }
 </style>
 </head>
@@ -542,6 +585,7 @@
       </div>
       <div class="spacer"></div>
       <div class="pill-tab">Engagement Hub</div>
+      <div class="askai-pill js-askai" title="Ask AI — available on every page">✨ Ask AI</div>
       <div class="whatsnew">What's New</div>
       <div class="ic-btn">?</div>
       <div class="av">AM</div>
@@ -572,12 +616,8 @@
           <div><div class="k-num">3</div><div class="k-lbl">My open tickets</div></div>
         </div>
         <div class="kpi">
-          <div class="k-ic ic-teal">◷</div>
-          <div><div class="k-num">Q4</div><div class="k-lbl">Oct – Dec 2025</div></div>
-        </div>
-        <div class="kpi">
           <div class="k-ic ic-purple">✨</div>
-          <div><div class="k-num">SME</div><div class="k-lbl">Ask the product agent</div></div>
+          <div><div class="k-num">Ask AI</div><div class="k-lbl">Docs · account · feature-aware</div></div>
         </div>
       </div>
 
@@ -659,6 +699,22 @@
                   <span class="date">Oct 20, 2025</span>
                 </div>
                 <p>Search across build logs with regex, highlights, and quick navigation to troubleshoot faster.</p>
+                <a href="https://youtu.be/ae2u0sobZs4" target="_blank" rel="noopener" class="f-video" title="Watch on YouTube">
+                  <div class="f-video-thumb">
+                    <img src="https://img.youtube.com/vi/ae2u0sobZs4/maxresdefault.jpg"
+                         alt="Build Logs Search demo"
+                         onerror="this.onerror=null;this.src='https://img.youtube.com/vi/ae2u0sobZs4/hqdefault.jpg';" />
+                    <span class="yt-play">▶</span>
+                    <span class="yt-dur">3:42</span>
+                  </div>
+                  <div class="f-video-meta">
+                    <span class="yt-ic">▶</span>
+                    <div>
+                      <div class="yt-title">Build Logs Search — Demo &amp; Walkthrough</div>
+                      <div class="yt-sub">Harness · YouTube</div>
+                    </div>
+                  </div>
+                </a>
                 <div class="f-foot">
                   <span class="chip">CI</span><span class="chip">Productivity</span>
                   <a href="#" class="doc">View Docs ↗</a>
@@ -725,108 +781,77 @@
           <div class="empty-add js-raise">＋ Raise a new ticket</div>
         </section>
 
-        <!-- QUARTER TIMELINE -->
-        <section class="card timeline">
-          <div class="card-head">
-            <span class="c-ic">🗓</span>
-            <h2>Quarter Timeline</h2>
-            <div class="head-r"><span class="collapse">▾</span></div>
-          </div>
-          <div class="q-switch">
-            <span class="arrow">‹</span>
-            <span class="q-label">Q4 2025 (Oct – Dec)</span>
-            <span class="arrow">›</span>
-          </div>
-
-          <div class="tl">
-            <div class="tl-row">
-              <div class="tl-rail"><div class="tl-dot"></div></div>
-              <div class="tl-main">
-                <div class="tl-date">Nov 12, 2025</div>
-                <div class="tl-badges"><span class="tl-badge">2 Releases</span><span class="tl-badge tk">1 Ticket</span></div>
-                <div class="tl-item">Pipeline Caching Enhancements</div>
-                <div class="tl-item">Git Experience Improvements</div>
-              </div>
-            </div>
-            <div class="tl-row">
-              <div class="tl-rail"><div class="tl-dot"></div></div>
-              <div class="tl-main">
-                <div class="tl-date">Nov 5, 2025</div>
-                <div class="tl-badges"><span class="tl-badge">1 Release</span></div>
-                <div class="tl-item">Custom Quality Gates</div>
-              </div>
-            </div>
-            <div class="tl-row">
-              <div class="tl-rail"><div class="tl-dot"></div></div>
-              <div class="tl-main">
-                <div class="tl-date">Oct 28, 2025</div>
-                <div class="tl-badges"><span class="tl-badge">1 Release</span></div>
-                <div class="tl-item">Pipeline Visual Studio UI Refresh</div>
-              </div>
-            </div>
-            <div class="tl-row">
-              <div class="tl-rail"><div class="tl-dot"></div></div>
-              <div class="tl-main">
-                <div class="tl-date">Oct 20, 2025</div>
-                <div class="tl-badges"><span class="tl-badge">1 Release</span><span class="tl-badge tk">2 Tickets</span></div>
-                <div class="tl-item">Build Logs Search</div>
-              </div>
-            </div>
-          </div>
-          <div class="tl-foot"><a href="#" class="mini-link">View full timeline →</a></div>
-        </section>
-
-        <!-- AGENT SME (tall right, emphasized as the differentiator) -->
+        <!-- ASK AI (Harness's global assistant, extended for Engagement) -->
         <section class="card sme">
           <div class="card-head">
             <span class="bot-ic">✨</span>
-            <h2>Agent SME</h2>
+            <h2>Ask AI</h2>
             <span class="beta">Beta</span>
             <div class="head-r"><span class="collapse" id="smeCollapse" title="Collapse">▾</span></div>
           </div>
 
           <div class="sme-body">
             <div class="sme-scroll">
-              <div class="msg user"><div class="bubble">What's the status of my caching request?</div></div>
+              <div class="msg user"><div class="bubble">How do I enable selective caching in my CI pipeline?</div></div>
 
               <div class="msg bot">
                 <div class="m-ic">✨</div>
                 <div class="bubble">
                   <div class="src-chips">
-                    <a href="#" class="src">Canny #FR-1267</a>
-                    <a href="#" class="src">Jira CD-51234</a>
+                    <a href="#" class="src">📄 Docs · CI Caching</a>
+                    <a href="#" class="src">📰 Feature Feed</a>
                   </div>
-                  Your feature request for <span class="hl">Pipeline Caching Enhancements</span> (#FR-1267) is currently <span class="hl">In Progress</span>. Our engineering team is actively working on it, targeted for release in <span class="hl">Q4 2025</span>.<br><br>
-                  Last updated Nov 10, 2025 by @jdoe.
+                  Enable the <span class="hl">Cache Intelligence</span> flag on your pipeline, then set <code>paths</code> under the caching step to scope what gets restored. This ties into the new <span class="hl">Pipeline Caching Enhancements</span> released Nov 12 — see the linked doc for a full YAML example.
                   <div class="fb"><span>👍</span><span>👎</span></div>
                 </div>
               </div>
 
-              <div class="msg user"><div class="bubble">How do I enable selective caching?</div></div>
+              <div class="msg user"><div class="bubble">Can I set per-branch cache eviction policies?</div></div>
 
               <div class="msg bot">
                 <div class="m-ic">✨</div>
                 <div class="bubble">
                   <div class="src-chips">
-                    <a href="#" class="src">docs · CI Caching ↗</a>
+                    <a href="#" class="src">📄 Docs</a>
+                    <a href="#" class="src">🏢 Account resources</a>
+                    <a href="#" class="src">📰 Feature Feed</a>
                   </div>
-                  Enable the <span class="hl">Cache Intelligence</span> flag on your pipeline, then set <code>paths</code> under the caching step to scope exactly what gets restored. See the linked doc for a full YAML example.
+                  I checked the docs, your account configuration, and the Feature Feed — <span class="hl">per-branch cache eviction policies aren't available today</span>. Want me to raise this as a feature request for you?
+
+                  <!-- tool call: create_feature_request -> renders a draft card for approval -->
+                  <div class="fr-card" id="frCard">
+                    <div class="fr-head">✨ Suggested feature request <span class="tool">tool · create_feature_request</span></div>
+                    <div class="fr-fields">
+                      <div class="fr-row"><span class="lbl">Title</span><span class="val title">Per-branch cache eviction policies</span></div>
+                      <div class="fr-row"><span class="lbl">Description</span><span class="val">Allow cache eviction/TTL rules to be configured per Git branch so short-lived feature branches don't consume the shared cache budget.</span></div>
+                      <div class="fr-row">
+                        <span class="lbl">Category</span>
+                        <span class="fr-tags"><span class="chip">Continuous Integration</span><span class="chip">Performance</span><span class="chip ff">🏢 app-harness-ng-cicd</span></span>
+                      </div>
+                    </div>
+                    <div class="fr-actions">
+                      <span class="fr-btn approve" id="frApprove">Approve &amp; submit</span>
+                      <span class="fr-btn edit">Edit</span>
+                      <span class="fr-btn deny" id="frDeny">Deny</span>
+                    </div>
+                    <div class="fr-created">✅ Created feature request <b>#FR-1312</b> and linked to your account. Track it under <b>My Tickets</b>.</div>
+                  </div>
                   <div class="fb"><span>👍</span><span>👎</span></div>
                 </div>
               </div>
             </div>
 
             <div class="suggest">
-              <span class="s">Any releases planned for Dec?</span>
-              <span class="s">Explain quality gates</span>
-              <span class="s">Is FR-1301 shipped?</span>
+              <span class="s">What CI features shipped this quarter?</span>
+              <span class="s">Status of my open tickets</span>
+              <span class="s">Request a new feature</span>
             </div>
 
             <div class="sme-input">
-              <input type="text" placeholder="Ask about features, tickets, or timelines…" />
+              <input type="text" placeholder="Ask about docs, your account, or request a feature…" />
               <button class="send">➤</button>
             </div>
-            <div class="disclaimer">AI responses may be inaccurate. Please verify with documentation.</div>
+            <div class="disclaimer">Ask AI can read docs, your account, and the Feature Feed — and draft feature requests for your approval. Responses may be inaccurate.</div>
           </div>
         </section>
 
@@ -890,15 +915,29 @@
 </div>
 
 <script>
-  // --- Agent SME collapse: reflow the bento so other cards reclaim the space ---
+  // --- Ask AI collapse: reflow the bento so other cards reclaim the space ---
   const bento    = document.querySelector('.bento');
   const smeHead  = document.querySelector('.sme .card-head');
   const smeChev  = document.getElementById('smeCollapse');
-  smeHead.addEventListener('click', () => {
-    const collapsed = bento.classList.toggle('sme-collapsed');
+  const setCollapsed = (collapsed) => {
+    bento.classList.toggle('sme-collapsed', collapsed);
     smeChev.textContent = collapsed ? '▸' : '▾';
     smeChev.title = collapsed ? 'Expand' : 'Collapse';
-  });
+  };
+  smeHead.addEventListener('click', () => setCollapsed(!bento.classList.contains('sme-collapsed')));
+
+  // --- Topbar "Ask AI" pill: expand the panel and scroll to it ---
+  document.querySelectorAll('.js-askai').forEach(el => el.addEventListener('click', () => {
+    setCollapsed(false);
+    document.querySelector('.sme').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }));
+
+  // --- In-chat feature request: approve / deny the drafted tool call ---
+  const frCard = document.getElementById('frCard');
+  const frApprove = document.getElementById('frApprove');
+  const frDeny = document.getElementById('frDeny');
+  if (frApprove) frApprove.addEventListener('click', () => frCard.classList.add('done'));
+  if (frDeny)    frDeny.addEventListener('click', () => { frCard.classList.remove('done'); frCard.classList.add('denied'); });
 
   // --- Raise a Ticket modal ---
   const modal = document.getElementById('ticketModal');
