@@ -249,6 +249,8 @@
     border: 1px solid var(--hn-border-strong); border-radius: 6px; padding: 5px 9px;
     display: inline-flex; align-items: center; gap: 6px;
   }
+  .select { cursor: pointer; }
+  .select:hover { border-color: var(--hn-primary); }
   .select .cx { color: var(--hn-ink-3); font-size: 9px; }
   .clear { margin-left: auto; font-size: 12px; color: var(--hn-primary); cursor: pointer; font-weight: 600; }
 
@@ -278,7 +280,22 @@
     padding: 2px 8px; border-radius: 6px; font-weight: 500;
   }
   .chip.ff { background: #e8f7ee; border-color: #cceedb; color: var(--hn-new-ink); }
-  .feature .doc { margin-left: auto; font-size: 12px; color: var(--hn-primary); text-decoration: none; font-weight: 600; }
+
+  /* -- Enable Feature Flag button (on feature-flag feed posts) -- */
+  .ff-enable {
+    font-size: 11px; font-weight: 700; cursor: pointer; border: none;
+    color: #fff; background: linear-gradient(135deg, #4dc36b, #2fae57);
+    padding: 3px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;
+    box-shadow: 0 1px 2px rgba(34,122,68,.25);
+  }
+  .ff-enable:hover { filter: brightness(1.05); }
+  .ff-enable::before { content: "⚑"; font-size: 10px; }
+  .ff-enabled {
+    font-size: 11px; font-weight: 700; color: var(--hn-new-ink);
+    background: #d7f2e1; border: 1px solid #b6e4c8; padding: 2px 9px; border-radius: 6px;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .feature .doc { margin-left: auto; font-size: 12px; color: var(--hn-primary); text-decoration: none; font-weight: 600; cursor: pointer; }
   .feed-foot { padding: 11px 16px; text-align: center; }
   .feed-foot .count { font-size: 11.5px; color: var(--hn-ink-3); margin-bottom: 8px; }
 
@@ -321,6 +338,7 @@
     border-bottom: 1px solid var(--hn-border);
   }
   .ticket:last-child { border-bottom: none; }
+  .ticket { cursor: pointer; }
   .ticket:hover { background: #fafcff; }
   .t-body { flex: 1; min-width: 0; }
   .t-top { display: flex; align-items: center; gap: 8px; }
@@ -519,6 +537,50 @@
   .dialog-foot .attach-hint { font-size: 11.5px; color: var(--hn-ink-3); }
   .dialog-foot .spacer { flex: 1; }
 
+  /* -- Enable-FF confirmation dialog -- */
+  .ff-lead { font-size: 13px; color: var(--hn-ink-2); line-height: 1.5; margin-bottom: 4px; }
+  .ff-lead b { color: var(--hn-ink); }
+  .ff-summary {
+    margin-top: 14px; border: 1px solid var(--hn-border); border-radius: 10px; overflow: hidden;
+  }
+  .ff-summary .row {
+    display: flex; justify-content: space-between; gap: 12px; padding: 9px 13px; font-size: 12.5px;
+    border-bottom: 1px solid var(--hn-border);
+  }
+  .ff-summary .row:last-child { border-bottom: none; }
+  .ff-summary .row .k { color: var(--hn-ink-3); }
+  .ff-summary .row .v { color: var(--hn-ink); font-weight: 600; text-align: right; }
+  .ff-summary .row .v code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px;
+    background: #f0f3f7; padding: 1px 6px; border-radius: 5px;
+  }
+  .ff-toggle {
+    margin-top: 12px; display: flex; align-items: center; gap: 10px; font-size: 12.5px;
+    color: var(--hn-ink-2); background: #f0f7ff; border: 1px solid #d7e8fb; border-radius: 8px; padding: 10px 12px;
+  }
+  .ff-toggle .sw {
+    width: 34px; height: 19px; border-radius: 20px; background: var(--hn-green); position: relative; flex-shrink: 0;
+  }
+  .ff-toggle .sw::after {
+    content: ""; position: absolute; top: 2px; right: 2px; width: 15px; height: 15px;
+    border-radius: 50%; background: #fff;
+  }
+  .btn-green { background: var(--hn-green); color: #fff; }
+  .btn-green:hover { filter: brightness(1.05); }
+
+  /* -- toast (demo feedback for clickable areas) -- */
+  .toast-wrap {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+    z-index: 200; display: flex; flex-direction: column; gap: 8px; align-items: center;
+  }
+  .toast {
+    background: #0b132b; color: #fff; font-size: 12.5px; font-weight: 500;
+    padding: 10px 16px; border-radius: 8px; box-shadow: 0 8px 28px rgba(11,19,43,.35);
+    display: flex; align-items: center; gap: 8px; animation: toastIn .18s ease;
+  }
+  .toast .ok { color: #6ee08a; }
+  @keyframes toastIn { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+
   @media (max-width: 1180px) {
     .bento { grid-template-columns: 1fr 1fr; }
     .feed { grid-column: 1; grid-row: 1; }
@@ -653,6 +715,8 @@
                 <div class="f-foot">
                   <span class="chip">CI</span><span class="chip">Performance</span>
                   <span class="chip ff">⚑ Feature Flag</span>
+                  <button class="ff-enable js-enable-ff"
+                          data-flag="CI_CACHE_INTELLIGENCE" data-feature="Pipeline Caching Enhancements">Enable FF</button>
                   <a href="#" class="doc">View Docs ↗</a>
                 </div>
               </div>
@@ -669,6 +733,9 @@
                 <p>Define custom quality gates using flexible rules and expressions to enforce code quality and compliance.</p>
                 <div class="f-foot">
                   <span class="chip">CI</span><span class="chip">Quality</span>
+                  <span class="chip ff">⚑ Feature Flag</span>
+                  <button class="ff-enable js-enable-ff"
+                          data-flag="CI_CUSTOM_QUALITY_GATES" data-feature="Custom Quality Gates">Enable FF</button>
                   <a href="#" class="doc">View Docs ↗</a>
                 </div>
               </div>
@@ -914,6 +981,34 @@
   </div>
 </div>
 
+<!-- ======================= ENABLE FEATURE FLAG MODAL ======================= -->
+<div class="modal" id="ffModal">
+  <div class="dialog" style="width:460px;">
+    <div class="dialog-head">
+      <h3>Enable Feature Flag</h3>
+      <span class="x js-ff-close">✕</span>
+    </div>
+    <div class="dialog-body" style="padding-bottom:16px;">
+      <p class="ff-lead">You're about to enable <b id="ffFeatureName">this feature</b> for your account. It will roll out immediately to the environment below.</p>
+      <div class="ff-summary">
+        <div class="row"><span class="k">Feature</span><span class="v" id="ffFeatureRow">—</span></div>
+        <div class="row"><span class="k">Flag key</span><span class="v"><code id="ffFlagKey">—</code></span></div>
+        <div class="row"><span class="k">Account</span><span class="v">app-harness-ng-cicd</span></div>
+        <div class="row"><span class="k">Environment</span><span class="v">Production</span></div>
+      </div>
+      <div class="ff-toggle"><span class="sw"></span> Flag will be set to <b style="margin:0 3px;">ON</b> for 100% of targets.</div>
+    </div>
+    <div class="dialog-foot">
+      <div class="spacer"></div>
+      <button class="btn btn-ghost js-ff-close">Cancel</button>
+      <button class="btn btn-green" id="ffConfirm">Enable Flag</button>
+    </div>
+  </div>
+</div>
+
+<!-- toast container -->
+<div class="toast-wrap" id="toastWrap"></div>
+
 <script>
   // --- Ask AI collapse: reflow the bento so other cards reclaim the space ---
   const bento    = document.querySelector('.bento');
@@ -956,6 +1051,83 @@
     t.classList.add('flash');
     setTimeout(() => t.classList.remove('flash'), 1300);
   }));
+
+  // --- Toast helper (lightweight feedback for the demo) ---
+  const toastWrap = document.getElementById('toastWrap');
+  function toast(msg, ok = true) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = (ok ? '<span class="ok">✓</span> ' : '') + msg;
+    toastWrap.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; }, 2200);
+    setTimeout(() => t.remove(), 2600);
+  }
+
+  // --- Enable Feature Flag: open confirmation dialog ---
+  const ffModal   = document.getElementById('ffModal');
+  const ffConfirm = document.getElementById('ffConfirm');
+  let ffPendingBtn = null;
+  const closeFf = () => ffModal.classList.remove('open');
+
+  document.querySelectorAll('.js-enable-ff').forEach(btn => btn.addEventListener('click', () => {
+    ffPendingBtn = btn;
+    document.getElementById('ffFeatureName').textContent = btn.dataset.feature;
+    document.getElementById('ffFeatureRow').textContent  = btn.dataset.feature;
+    document.getElementById('ffFlagKey').textContent     = btn.dataset.flag;
+    ffModal.classList.add('open');
+  }));
+
+  document.querySelectorAll('.js-ff-close').forEach(el => el.addEventListener('click', closeFf));
+  ffModal.addEventListener('click', e => { if (e.target === ffModal) closeFf(); });
+
+  ffConfirm.addEventListener('click', () => {
+    if (ffPendingBtn) {
+      const badge = document.createElement('span');
+      badge.className = 'ff-enabled';
+      badge.textContent = '✓ FF Enabled';
+      ffPendingBtn.replaceWith(badge);
+      toast('Feature flag <b style="margin-left:3px">' + (ffPendingBtn.dataset.flag) + '</b> enabled for app-harness-ng-cicd');
+      ffPendingBtn = null;
+    }
+    closeFf();
+  });
+
+  // --- Extra clickable areas for a demoable MVP (engagement tab only) ---
+  document.querySelectorAll('.feed-filters .select').forEach(s =>
+    s.addEventListener('click', () => toast('Filter applied · ' + s.textContent.replace(/▾/g,'').trim())));
+  const clearAll = document.querySelector('.feed-filters .clear');
+  if (clearAll) clearAll.addEventListener('click', () => toast('Filters cleared'));
+
+  document.querySelectorAll('.feature .doc').forEach(d =>
+    d.addEventListener('click', e => { e.preventDefault(); toast('Opening documentation ↗'); }));
+
+  const loadMore = document.querySelector('.feed-foot .btn');
+  if (loadMore) loadMore.addEventListener('click', e => { e.preventDefault(); toast('All 4 features are shown', false); });
+
+  const viewAll = document.querySelector('.tickets .mini-link');
+  if (viewAll) viewAll.addEventListener('click', e => { e.preventDefault(); toast('Opening all tickets ↗'); });
+
+  document.querySelectorAll('.suggest .s').forEach(s =>
+    s.addEventListener('click', () => {
+      setCollapsed(false);
+      document.querySelector('.sme-input input').value = s.textContent;
+      document.querySelector('.sme-input input').focus();
+    }));
+
+  document.querySelectorAll('.msg .src').forEach(src =>
+    src.addEventListener('click', e => { e.preventDefault(); toast('Reference · ' + src.textContent.trim()); }));
+
+  const sendBtn = document.querySelector('.sme-input .send');
+  if (sendBtn) sendBtn.addEventListener('click', () => {
+    const inp = document.querySelector('.sme-input input');
+    if (inp.value.trim()) { toast('Ask AI is thinking…', false); inp.value = ''; }
+  });
+
+  document.querySelectorAll('.ticket').forEach(t =>
+    t.addEventListener('click', () => {
+      const id = t.querySelector('.t-id');
+      toast('Opening ticket ' + (id ? id.textContent : ''));
+    }));
 </script>
 </body>
 </html>
