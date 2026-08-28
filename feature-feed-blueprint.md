@@ -1,4 +1,4 @@
-# Feature Feed — Engineering Spec
+# Feature Feed - Engineering Spec
 
 Scope: **Feature Feed only.** (Tickets & Ask AI extensions are separate phases.)
 Two layers: **Publisher** (how cards get created) and **Consumer** (how cards get seen).
@@ -8,7 +8,7 @@ Mockups: `mvp.html` (Engagement Hub / archive) · `pipelines-nudge.html` (in-con
 
 ---
 
-# LAYER 1 — Publisher Flow
+# LAYER 1 - Publisher Flow
 
 No admin panel. No marketing dependency. Cards are a **byproduct of the docs release-notes workflow.**
 
@@ -21,19 +21,19 @@ No admin panel. No marketing dependency. Cards are a **byproduct of the docs rel
 1. Fires only on **release-notes** files (not doc fixes)
 2. Each release-note entry → one candidate card
 3. AI enriches card from **fixed vocabularies only** (never invents tags):
-   1. **Type** — New / Improved / Deprecated / Beta *(from release-note section)*
-   2. **Module** — CI, CD, GitOps, FF, FME, CCM, STO, Chaos, SEI, IDP, IaCM, SSCA, Code Repo, CDE, DBOps, HAR, CET, SRM, Platform
-   3. **Sub-module** — scoped to module (e.g. CD → Deployment / Env Groups / Approvals / Templates / Triggers)
-   4. **Category** — Performance, UX/Usability, Quality, Security, Productivity, Cost, Integrations
+   1. **Type** - New / Improved / Deprecated / Beta *(from release-note section)*
+   2. **Module** - CI, CD, GitOps, FF, FME, CCM, STO, Chaos, SEI, IDP, IaCM, SSCA, Code Repo, CDE, DBOps, HAR, CET, SRM, Platform
+   3. **Sub-module** - scoped to module (e.g. CD → Deployment / Env Groups / Approvals / Templates / Triggers)
+   4. **Category** - Performance, UX/Usability, Quality, Security, Productivity, Cost, Integrations
    5. Low confidence → `uncategorized` + flag for human triage (never blocks)
 4. Builds card JSON, assigns stable `feature_id` (from release-note slug → idempotent, no dupes on rerun)
 5. `POST` to Feature Feed DB
 
 ### 3. Enrichment (optional, no UI)
 1. Fields not in docs: `video_url`, `image_url`, `feature_flag_key`, `target_routes`, `priority`
-2. **`feature_flag_key` comes from the feature owner's PR** (docs can't supply it) — required for the Enable-FF CTA
+2. **`feature_flag_key` comes from the feature owner's PR** (docs can't supply it) - required for the Enable-FF CTA
 3. Update path (pick one for v1):
-   1. Git-backed card file edited via PR → sync pipeline pushes git → DB *(recommended — natural for engineers, free history/review)*
+   1. Git-backed card file edited via PR → sync pipeline pushes git → DB *(recommended - natural for engineers, free history/review)*
    2. "Update Feature Feed Card" pipeline run with params (`feature_id` + fields to patch)
 
 ### 4. Card schema
@@ -53,14 +53,18 @@ No admin panel. No marketing dependency. Cards are a **byproduct of the docs rel
 
 ---
 
-# LAYER 2 — Consumer Flow
+# LAYER 2 - Consumer Flow
 
 Same backend, three surfaces. Ranked by adoption impact.
 
-### A. In-context nudge (primary) — `pipelines-nudge.html`
+### A. In-context nudge (primary) - `pipelines-nudge.html`
 1. Any product page mounts one hook: `useFeatureFeed(pageContext)` → `<FeatureNudge>`
-2. Placement: **bottom-right floating spotlight card** — never covers content, slides in, dismissible
-3. **Selection query** for a page:
+2. Placement: **bottom-right floating spotlight card** - never covers content, slides in, dismissible
+3. Show **top 1-2** cards for the page, stacked, with a **"View more"** footer into the Engagement Hub archive; each card dismissible independently
+
+![Contextual nudge stack on the CI Pipelines list page - top 1-2 relevant cards plus a "View more" footer](nudges.png)
+
+4. **Selection query** for a page:
    ```
    show cards where
      (card.module == page.module OR card.target_routes matches route)
@@ -71,8 +75,8 @@ Same backend, three surfaces. Ranked by adoption impact.
    rank by priority desc, publishedAt desc
    show top 1-2, subject to global per-session nudge budget
    ```
-4. Recency = **ranking** signal, not a hard 1-3 day gate (users may not visit the page in time)
-5. CTAs: **Enable FF** (→ confirm dialog → flag ON), View Docs, Watch Video, Not now
+5. Recency = **ranking** signal, not a hard 1-3 day gate (users may not visit the page in time)
+6. CTAs: **Enable FF** (→ confirm dialog → flag ON), View Docs, Watch Video, Not now
 
 ### B. What's New bell + archive (secondary)
 1. Topbar bell with **unseen-count dot**
@@ -91,11 +95,11 @@ Store per `(userId, accountId, feature_id)` → `{ servedCount, lastServedAt, st
 - **acted** (docs / video / Enable-FF click) → suppress permanently + **count as conversion**
 - **ignored** (scrolled past) → increment count; after K servings auto-retire
 - API: `POST /feature-feed/{id}/impression { state }`
-- These events (`served / dismissed / clicked / ff_enabled`) **are the Mixpanel funnel** — no extra instrumentation
+- These events (`served / dismissed / clicked / ff_enabled`) **are the Mixpanel funnel** - no extra instrumentation
 
 ### Guardrails
-1. **Frequency cap** — max 1 nudge per surface + global session/day budget + cooldown (make-or-break for not being spammy)
-2. **Entitlement filter** — hide features the account can't use
+1. **Frequency cap** - max 1 nudge per surface + global session/day budget + cooldown (make-or-break for not being spammy)
+2. **Entitlement filter** - hide features the account can't use
 3. Never re-show dismissed/acted cards
 
 ---
@@ -111,11 +115,11 @@ Store per `(userId, accountId, feature_id)` → `{ servedCount, lastServedAt, st
 | MCP | `list_feature_updates(...)` | Consumer (agent) |
 
 ## Where it lives (grounded in cloned repos)
-- **Frontend** — `harness-core-ui`: new `src/modules/NN-engagement/` (archive tab) + `useFeatureFeed` hook & `<FeatureNudge>` in `src/modules/10-common`; register nav in `src/framework/types/ModuleName.ts`. Reuse the existing `ResourceCenter/ReleaseNotesModal` pattern.
-- **Backend** — `harness-core`: feature-feed service (card CRUD, targeting, impressions).
-- **FF integration** — `ff-server` for the Enable-FF CTA.
-- **MCP** — Harness MCP server (`genai` module: `mcp-server` / `mcp-server-external`) for `list_feature_updates`.
-- **Publisher** — `developer-hub` docs pipeline gets the auto-generate step.
+- **Frontend** - `harness-core-ui`: new `src/modules/NN-engagement/` (archive tab) + `useFeatureFeed` hook & `<FeatureNudge>` in `src/modules/10-common`; register nav in `src/framework/types/ModuleName.ts`. Reuse the existing `ResourceCenter/ReleaseNotesModal` pattern.
+- **Backend** - `harness-core`: feature-feed service (card CRUD, targeting, impressions).
+- **FF integration** - `ff-server` for the Enable-FF CTA.
+- **MCP** - Harness MCP server (`genai` module: `mcp-server` / `mcp-server-external`) for `list_feature_updates`.
+- **Publisher** - `developer-hub` docs pipeline gets the auto-generate step.
 
 ## Open decisions
 1. v1 targeting: module-only, or module + route precision? *(suggest module-only v1)*
@@ -124,3 +128,16 @@ Store per `(userId, accountId, feature_id)` → `{ servedCount, lastServedAt, st
 
 ## Out of scope (this phase)
 Tickets / JIRA sync · comments & reactions · Quarter Timeline · standalone admin panel.
+
+---
+
+## Success metrics
+The impression events are the funnel - no extra instrumentation. Three headline numbers, top to bottom:
+
+| # | Metric | Definition | Event |
+|---|---|---|---|
+| 1 | **Impressions** | cards actually rendered to a user (not just fetched) | `served` |
+| 2 | **Actions** | clicks on any CTA - View Docs, Watch Video, Enable FF | `clicked` |
+| 3 | **FF enablements** | feature flags turned ON from a nudge CTA (the conversion) | `ff_enabled` |
+
+Read as a funnel: **Impressions → Actions → FF enablements**. Action rate = actions / impressions; conversion rate = FF enablements / impressions. Slice by module, card, and surface (nudge / bell / Ask AI) in Mixpanel.
