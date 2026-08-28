@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Harness · Engagement Hub — MVP Mockup</title>
+<title>Harness · What's New — MVP Mockup</title>
 <style>
   /* ------------------------------------------------------------------
-     Harness Engagement Hub — MVP mockup
+     Harness What's New — MVP mockup
      Three pillars in an equal-weight bento grid: Feature Feed,
      My Tickets, and Ask AI (Harness's global assistant, extended with
      feature-feed + feature-request tools). Quarter Timeline removed.
@@ -46,6 +46,7 @@
 
   html, body {
     height: 100%;
+    overflow: hidden;
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: var(--hn-bg);
     color: var(--hn-ink);
@@ -55,16 +56,18 @@
   }
 
   /* ============================ APP SHELL ============================ */
-  .app { display: flex; min-height: 100vh; }
+  .app { display: flex; height: 100vh; overflow: hidden; }
 
   /* ------------ Left dark module nav ------------ */
   .sidebar {
     width: 232px;
+    height: 100vh;
     background: var(--hn-nav);
     color: #c6d0dc;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+    overflow: hidden;
     border-right: 1px solid #0a1422;
   }
   .brand {
@@ -100,7 +103,7 @@
   .project-pill .pj-name { font-size: 12.5px; color: #eaf0f6; font-weight: 600; }
   .project-pill .chev { margin-left: auto; color: #61748a; }
 
-  .nav { padding: 6px 8px; flex: 1; overflow: auto; }
+  .nav { padding: 6px 8px; flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0; }
   .nav a {
     display: flex; align-items: center; gap: 11px;
     padding: 8px 12px; border-radius: 7px;
@@ -120,17 +123,40 @@
   }
   .nav-sep { height: 1px; background: rgba(255,255,255,.07); margin: 8px 12px; }
 
-  .sidebar-foot {
+  .sidebar-bottom {
+    flex-shrink: 0;
     border-top: 1px solid rgba(255,255,255,.07);
-    padding: 10px 12px;
+    padding: 8px;
   }
-  .sidebar-foot .cta {
-    display: block; text-align: center; font-size: 12px; font-weight: 600;
-    color: #cfe4ff; border: 1px solid rgba(2,120,213,.5); border-radius: 7px;
-    padding: 8px; margin-bottom: 10px; text-decoration: none;
+  .sidebar-bottom a {
+    display: flex; align-items: center; gap: 11px;
+    padding: 8px 12px; border-radius: 7px;
+    color: #b3c0cf; text-decoration: none; font-size: 13px; font-weight: 500;
+    margin-bottom: 1px;
   }
-  .sidebar-foot .who { display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: #b3c0cf; }
-  .sidebar-foot .who .av {
+  .sidebar-bottom a .ic { width: 18px; text-align: center; opacity: .85; font-size: 14px; flex-shrink: 0; }
+  .sidebar-bottom a:hover { background: rgba(255,255,255,.05); color: #eaf0f6; }
+  .sidebar-bottom a.active {
+    background: rgba(2,120,213,.16);
+    color: #ffffff;
+    box-shadow: inset 2px 0 0 var(--hn-teal);
+  }
+  .sidebar-bottom a .info {
+    margin-left: auto; width: 14px; height: 14px; border-radius: 50%;
+    border: 1px solid #61748a; color: #61748a; font-size: 9px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .sidebar-bottom .count-badge {
+    margin-left: auto; min-width: 22px; height: 22px; padding: 0 6px;
+    border-radius: 50%; background: var(--hn-primary); color: #fff;
+    font-size: 10.5px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .sidebar-bottom .who {
+    display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: #b3c0cf;
+    padding: 10px 12px 4px;
+  }
+  .sidebar-bottom .who .av {
     width: 24px; height: 24px; border-radius: 50%;
     background: linear-gradient(135deg, var(--hn-green), var(--hn-teal));
     display: flex; align-items: center; justify-content: center;
@@ -138,7 +164,7 @@
   }
 
   /* ------------ Main column ------------ */
-  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; height: 100vh; overflow: hidden; }
 
   .topbar {
     height: 52px; background: var(--hn-topbar);
@@ -159,11 +185,6 @@
     background: #f4f0ff; border: 1px solid #ddd0fb; border-radius: 20px; padding: 5px 12px;
   }
   .topbar .askai-pill:hover { background: #ece4ff; }
-  .topbar .whatsnew { font-size: 13px; color: var(--hn-ink-2); position: relative; }
-  .topbar .whatsnew::after {
-    content: ""; position: absolute; top: -2px; right: -8px; width: 6px; height: 6px;
-    border-radius: 50%; background: #e5484d;
-  }
   .topbar .ic-btn { color: var(--hn-ink-3); font-size: 15px; }
   .topbar .av {
     width: 28px; height: 28px; border-radius: 50%;
@@ -173,7 +194,7 @@
   }
 
   /* ============================ CONTENT ============================ */
-  .content { padding: 20px 24px 32px; overflow: auto; }
+  .content { flex: 1; padding: 20px 24px 32px; overflow-y: auto; overflow-x: hidden; min-height: 0; }
 
   .page-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
   .page-head h1 { font-size: 21px; font-weight: 700; letter-spacing: -.01em; display: flex; align-items: center; gap: 10px; }
@@ -683,14 +704,20 @@
       <a href="#"><span class="ic">⊞</span> Overrides</a>
       <a href="#"><span class="ic">⑂</span> GitOps</a>
       <div class="nav-sep"></div>
-      <a href="#" class="active"><span class="ic">◆</span> Engagement <span class="tag">NEW</span></a>
       <a href="#"><span class="ic">▥</span> Product Usage</a>
       <div class="nav-sep"></div>
       <a href="#"><span class="ic">⚙</span> Project Settings</a>
     </nav>
 
-    <div class="sidebar-foot">
-      <a href="#" class="cta">Launch CD First Generation</a>
+    <div class="sidebar-bottom">
+      <a href="#"><span class="ic">⊞</span> Account Settings <span class="info">i</span></a>
+      <a href="#"><span class="ic">⎇</span> Organization Settings <span class="info">i</span></a>
+      <div class="nav-sep"></div>
+      <a href="#"><span class="ic">⚙</span> Configure Unified View</a>
+      <div class="nav-sep"></div>
+      <a href="#" class="active"><span class="ic">✦</span> What's New <span class="count-badge">9</span></a>
+      <a href="#"><span class="ic">🔔</span> Alerts <span class="count-badge">9+</span></a>
+      <a href="#"><span class="ic">💬</span> Help</a>
       <div class="who"><span class="av">AM</span> Akshit Madan</div>
     </div>
   </aside>
@@ -704,9 +731,8 @@
         <a href="#">Project: akshit-devrel-harness</a>
       </div>
       <div class="spacer"></div>
-      <div class="pill-tab">Engagement Hub</div>
+      <div class="pill-tab">What's New</div>
       <div class="askai-pill js-askai" title="Ask AI — available on every page">✨ Ask AI</div>
-      <div class="whatsnew">What's New</div>
       <div class="ic-btn">?</div>
       <div class="av">AM</div>
     </div>
@@ -716,28 +742,12 @@
       <!-- page head -->
       <div class="page-head">
         <div>
-          <h1>Engagement Hub <span class="beta">Beta</span></h1>
+          <h1>What's New <span class="beta">Beta</span></h1>
           <p>Stay informed, share feedback, and get answers — all in one place.</p>
         </div>
         <div class="head-actions">
           <a href="#" class="btn btn-primary js-raise">＋ Raise a Ticket</a>
           <a href="#" class="btn btn-ghost js-mytickets">🎫 My Tickets</a>
-        </div>
-      </div>
-
-      <!-- pillar quick stats: gives all four pillars first-class presence -->
-      <div class="kpis">
-        <div class="kpi">
-          <div class="k-ic ic-green">✦</div>
-          <div><div class="k-num">5</div><div class="k-lbl">Releases this quarter</div></div>
-        </div>
-        <div class="kpi">
-          <div class="k-ic ic-blue">🎫</div>
-          <div><div class="k-num">3</div><div class="k-lbl">My open tickets</div></div>
-        </div>
-        <div class="kpi">
-          <div class="k-ic ic-purple">✨</div>
-          <div><div class="k-num">Ask AI</div><div class="k-lbl">Docs · account · feature-aware</div></div>
         </div>
       </div>
 

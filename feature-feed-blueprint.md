@@ -1,156 +1,126 @@
-# Feature Feed — Engineering Scope / Blueprint
+# Feature Feed — Engineering Spec
 
-Scope: **Feature Feed only.** (Tickets and Ask AI are out of scope for this phase.)
-Location: Engagement tab (`NEW`) in the Harness product left nav.
+Scope: **Feature Feed only.** (Tickets & Ask AI extensions are separate phases.)
+Two layers: **Publisher** (how cards get created) and **Consumer** (how cards get seen).
+Principle: the feed is a **tagged content backend**, not a destination. Cards are surfaced in-context; "What's New" is only the archive.
 
----
-
-## Consumer View
-
-* All posts sorted in reverse chronological order
-* Default filter: current quarter
-
-### 1. Feed Header
-1. Title — "Feature Feed"
-2. Subtitle — "latest releases & improvements"
-3. Collapse / expand feed toggle
-
-### 2. Filters
-1. Time period — Quarter / date range (default: current quarter)
-2. Module — CI, CD, FF, CCM, STO, Chaos, SEI, IDP, Code Repo, etc.
-3. Sub Module — GitOps, Deployment, FF, CV, Approvals, OPA, etc.
-4. Category — Performance, UX, Quality, Usability
-5. "Clear all" — resets all filters
-6. Result count — "Showing X to Y of N features"
-
-### 3. Paginated List of Posts
-1. Post Tag — New / Improved
-2. Post Title — single liner
-3. Post Description — 2 liner
-4. Date + timeago — top right of post
-5. Module Tag — CI, CD, etc.
-6. Sub Module Tag — GitOps, Deployment, FF, CV, Approvals, OPA, etc.
-7. Category Tag — Performance, UX, Quality, Usability
-8. Media (optional, per post)
-   1. Thumbnail (image)
-   2. Video preview card (YouTube link)
-9. CTAs (conditional — render only when data present)
-   1. Enable Feature (FF) — if flag key attached
-   2. Go to Docs — if docs link attached
-   3. Watch Video — if video link attached (opens player)
-   4. Open Image — if image attached (opens full screen)
-
-### 4. CTA — Enable Feature (FF)
-1. Visible only when post has an FF flag key
-2. Click → confirmation dialog
-   1. Feature name
-   2. Flag key (e.g. `CI_CACHE_INTELLIGENCE`)
-   3. Account (auto-filled, current account)
-   4. Environment (default: Production)
-   5. Target rollout (default: ON / 100%)
-   6. Cancel / Enable Flag
-3. On confirm
-   1. Call FF service to set flag ON for account
-   2. Button → "✓ FF Enabled" state (non-clickable)
-   3. Success toast
-4. States — default / enabling (loading) / enabled / error
-5. Permissions — hide/disable if user lacks FF edit rights
-
-### 5. CTA — Go to Docs
-1. Opens docs link in new tab
-
-### 6. CTA — Watch Video
-1. Opens video player (modal / lightbox)
-2. Fallback to poster thumbnail + external link if embed blocked
-
-### 7. CTA — Open Image
-1. Opens image full screen (lightbox)
-2. Close on ✕ / Esc / backdrop click
-
-### 8. Pagination
-1. "Load more" (or numbered pages)
-2. Result count updates
-3. States — loading / empty ("No features match filters") / error / end of list
+Mockups: `mvp.html` (Engagement Hub / archive) · `pipelines-nudge.html` (in-context surfacing on a product page).
 
 ---
 
-## Admin View
+# LAYER 1 — Publisher Flow
 
-Two candidate approaches (pick one for phase 1):
+No admin panel. No marketing dependency. Cards are a **byproduct of the docs release-notes workflow.**
 
-### Approach 1 — Post via Pipeline
-1. Post authored as pipeline step / config (YAML)
-2. Publishing gated by pipeline approval
-3. Version-controlled in Git
-4. Auto-publish on merge / release
+### 1. Source trigger
+1. Doc engineer merges/publishes a **release note** in the docs repo
+2. Docs build+deploy pipeline runs as usual
+3. New **"Feature Feed" step** added to that pipeline
 
-### Approach 2 — Separate Admin Dashboard
-1. Create / Edit / Delete post UI
-2. Draft / Publish / Schedule
-3. Preview before publish
-4. Role-gated access (admin only)
+### 2. Auto-generate step (in docs pipeline)
+1. Fires only on **release-notes** files (not doc fixes)
+2. Each release-note entry → one candidate card
+3. AI enriches card from **fixed vocabularies only** (never invents tags):
+   1. **Type** — New / Improved / Deprecated / Beta *(from release-note section)*
+   2. **Module** — CI, CD, GitOps, FF, FME, CCM, STO, Chaos, SEI, IDP, IaCM, SSCA, Code Repo, CDE, DBOps, HAR, CET, SRM, Platform
+   3. **Sub-module** — scoped to module (e.g. CD → Deployment / Env Groups / Approvals / Templates / Triggers)
+   4. **Category** — Performance, UX/Usability, Quality, Security, Productivity, Cost, Integrations
+   5. Low confidence → `uncategorized` + flag for human triage (never blocks)
+4. Builds card JSON, assigns stable `feature_id` (from release-note slug → idempotent, no dupes on rerun)
+5. `POST` to Feature Feed DB
 
-### Post Fields (create / edit — both approaches)
-1. Tag — New / Improved
-2. Title — single liner
-3. Description — 2 liner
-4. Publish date (default now; schedulable)
-5. Module (required)
-6. Sub Module (optional, multi)
-7. Category (optional, multi)
-8. Docs link (optional)
-9. Video link (optional)
-10. Image upload (optional)
-11. FF flag key (optional — enables "Enable FF" CTA)
-12. Targeting — all accounts / specific accounts / by module entitlement
+### 3. Enrichment (optional, no UI)
+1. Fields not in docs: `video_url`, `image_url`, `feature_flag_key`, `target_routes`, `priority`
+2. **`feature_flag_key` comes from the feature owner's PR** (docs can't supply it) — required for the Enable-FF CTA
+3. Update path (pick one for v1):
+   1. Git-backed card file edited via PR → sync pipeline pushes git → DB *(recommended — natural for engineers, free history/review)*
+   2. "Update Feature Feed Card" pipeline run with params (`feature_id` + fields to patch)
 
-### Post Lifecycle
-1. Draft → Scheduled → Published → Archived
-2. Edit published post
-3. Unpublish / archive
-
----
-
-## Data Model (Post)
-
-| Field | Type | Notes |
+### 4. Card schema
+| Field | Source | Notes |
 |---|---|---|
-| id | string | unique |
-| tag | enum | New / Improved |
-| title | string | single liner |
-| description | string | 2 liner |
-| publishedAt | datetime | drives sort + timeago |
-| module | enum | CI, CD, FF, ... |
-| subModules | enum[] | GitOps, Deployment, ... |
-| categories | enum[] | Performance, UX, ... |
-| docsUrl | string? | enables Docs CTA |
-| videoUrl | string? | enables Video CTA |
-| imageUrl | string? | enables Image CTA |
-| ffFlagKey | string? | enables Enable-FF CTA |
-| targeting | object | all / accounts / entitlement |
-| status | enum | draft / scheduled / published / archived |
+| feature_id | pipeline | stable, from release-note slug |
+| type | release note | New / Improved / … |
+| title, description | release note | 1-liner + 2-liner |
+| module, sub_modules[], categories[] | AI (fixed vocab) | closed lists |
+| publishedAt | pipeline | drives recency + timeago |
+| docs_url | release note | Docs CTA |
+| video_url, image_url | enrichment | Video / Image CTA |
+| feature_flag_key | owner PR | Enable-FF CTA |
+| target_routes[] | enrichment | fine-grained page targeting |
+| priority | enrichment | ranking + nudge-eligibility |
+| eligibility_window | default/enrichment | how long it may surface |
 
 ---
 
-## Cross-cutting
+# LAYER 2 — Consumer Flow
 
-1. Access — feed visible to all users in account; admin authoring role-gated
-2. Entitlement — posts respect module entitlement (hide features user can't access) — TBD
-3. Responsive — feed usable on narrow viewports
-4. Analytics / events (for adoption metrics)
-   1. post_impression
-   2. post_expand
-   3. docs_click
-   4. video_play
-   5. image_open
-   6. ff_enable_click / ff_enable_confirm / ff_enable_success
-   7. filter_apply
-5. Empty / loading / error states for feed + each CTA
+Same backend, three surfaces. Ranked by adoption impact.
+
+### A. In-context nudge (primary) — `pipelines-nudge.html`
+1. Any product page mounts one hook: `useFeatureFeed(pageContext)` → `<FeatureNudge>`
+2. Placement: **bottom-right floating spotlight card** — never covers content, slides in, dismissible
+3. **Selection query** for a page:
+   ```
+   show cards where
+     (card.module == page.module OR card.target_routes matches route)
+     AND account entitled to card.module        // never surface unusable features
+     AND user has NOT dismissed/acted            // impression suppression
+     AND user.impressionCount(card) < K          // frequency cap
+     AND now within eligibility_window
+   rank by priority desc, publishedAt desc
+   show top 1-2, subject to global per-session nudge budget
+   ```
+4. Recency = **ranking** signal, not a hard 1-3 day gate (users may not visit the page in time)
+5. CTAs: **Enable FF** (→ confirm dialog → flag ON), View Docs, Watch Video, Not now
+
+### B. What's New bell + archive (secondary)
+1. Topbar bell with **unseen-count dot**
+2. Click → popover of recent cards → "View all in Engagement Hub"
+3. Engagement Hub tab = full searchable/filterable **archive** (ignores impression state); low traffic is expected/fine
+
+### C. Ask AI + MCP tool (highest-conversion)
+1. Ask AI bot grounded on the feed → reactive surfacing on user questions
+2. **`list_feature_updates` tool in Harness MCP** → Harness DevOps agent fetches cards at point-of-work
+3. Tool returns `feature_flag_key` so the agent can chain **awareness → explain → enable FF in one turn** (collapses the adoption funnel)
+
+### Impression / state model
+Store per `(userId, accountId, feature_id)` → `{ servedCount, lastServedAt, state }`.
+- **served** = actually rendered (not just fetched)
+- **dismissed** ("close"/"Not now") → suppress permanently
+- **acted** (docs / video / Enable-FF click) → suppress permanently + **count as conversion**
+- **ignored** (scrolled past) → increment count; after K servings auto-retire
+- API: `POST /feature-feed/{id}/impression { state }`
+- These events (`served / dismissed / clicked / ff_enabled`) **are the Mixpanel funnel** — no extra instrumentation
+
+### Guardrails
+1. **Frequency cap** — max 1 nudge per surface + global session/day budget + cooldown (make-or-break for not being spammy)
+2. **Entitlement filter** — hide features the account can't use
+3. Never re-show dismissed/acted cards
 
 ---
 
-## Out of Scope (this phase)
-1. Tickets (raise / track / JIRA sync)
-2. Ask AI integration
-3. Comments / reactions on posts
-4. Quarter Timeline
+## APIs
+| Method | Path | Layer |
+|---|---|---|
+| POST | `/feature-feed` | Publisher (pipeline writes card) |
+| PATCH | `/feature-feed/{id}` | Publisher (enrichment) |
+| GET | `/feature-feed?module=&route=&since=` | Consumer (page surfacing) |
+| GET | `/feature-feed/archive` | Consumer (What's New) |
+| POST | `/feature-feed/{id}/impression` | Consumer (suppression + analytics) |
+| MCP | `list_feature_updates(...)` | Consumer (agent) |
+
+## Where it lives (grounded in cloned repos)
+- **Frontend** — `harness-core-ui`: new `src/modules/NN-engagement/` (archive tab) + `useFeatureFeed` hook & `<FeatureNudge>` in `src/modules/10-common`; register nav in `src/framework/types/ModuleName.ts`. Reuse the existing `ResourceCenter/ReleaseNotesModal` pattern.
+- **Backend** — `harness-core`: feature-feed service (card CRUD, targeting, impressions).
+- **FF integration** — `ff-server` for the Enable-FF CTA.
+- **MCP** — Harness MCP server (`genai` module: `mcp-server` / `mcp-server-external`) for `list_feature_updates`.
+- **Publisher** — `developer-hub` docs pipeline gets the auto-generate step.
+
+## Open decisions
+1. v1 targeting: module-only, or module + route precision? *(suggest module-only v1)*
+2. Enrichment model: git-backed PR vs parameterized pipeline? *(suggest git-backed)*
+3. Owner of the fixed taxonomy + `uncategorized` triage queue?
+
+## Out of scope (this phase)
+Tickets / JIRA sync · comments & reactions · Quarter Timeline · standalone admin panel.

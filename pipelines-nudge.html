@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Harness — Pipelines (contextual Feature Feed nudge)</title>
+<style>
+  :root {
+    --hn-bg:#f4f6f8; --hn-surface:#fff; --hn-nav:#0b1728; --hn-nav-2:#122238;
+    --hn-border:#e3e8ef; --hn-border-strong:#cdd5df;
+    --hn-ink:#0b132b; --hn-ink-2:#4a5568; --hn-ink-3:#7b8794;
+    --hn-primary:#0278d5; --hn-green:#4dc36b; --hn-teal:#00ade4; --hn-purple:#6938ef;
+    --hn-new:#e8f7ee; --hn-new-ink:#227a44;
+    --hn-shadow:0 1px 2px rgba(11,19,43,.06),0 1px 3px rgba(11,19,43,.05);
+    --hn-shadow-lg:0 4px 16px rgba(11,19,43,.10);
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+         background:var(--hn-bg); color:var(--hn-ink); font-size:14px; }
+  .app { display:flex; min-height:100vh; }
+
+  /* ---------- sidebar ---------- */
+  .sidebar { width:236px; background:var(--hn-nav); color:#c7d2e0; display:flex; flex-direction:column; flex-shrink:0; }
+  .sb-top { display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.07); position:relative; }
+  .sb-logo { width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,#6938ef,#00ade4);
+             display:flex; align-items:center; justify-content:center; font-size:15px; color:#fff; }
+  .sb-top .mod { font-size:14px; font-weight:700; color:#fff; line-height:1.15; }
+  .sb-top .mod small { display:block; font-size:10.5px; font-weight:500; color:#8ea0b5; }
+  .sb-new { position:absolute; top:6px; left:8px; background:#6938ef; color:#fff; font-size:8px; font-weight:800;
+            padding:1px 4px; border-radius:4px; letter-spacing:.05em; }
+  .sb-proj { margin:12px; padding:9px 12px; background:var(--hn-nav-2); border-radius:8px; display:flex; align-items:center; gap:8px; }
+  .sb-proj small { display:block; font-size:9.5px; color:#8ea0b5; text-transform:uppercase; letter-spacing:.06em; }
+  .sb-proj b { font-size:13px; color:#fff; font-weight:600; }
+  .sb-proj .cx { margin-left:auto; color:#8ea0b5; }
+  .nav { padding:4px 8px; display:flex; flex-direction:column; gap:1px; }
+  .nav a { display:flex; align-items:center; gap:11px; padding:9px 12px; border-radius:7px; color:#c7d2e0;
+           text-decoration:none; font-size:13.5px; }
+  .nav a .ic { width:17px; text-align:center; opacity:.85; }
+  .nav a:hover { background:rgba(255,255,255,.06); color:#fff; }
+  .nav a.active { background:rgba(2,120,213,.16); color:#fff; box-shadow:inset 2px 0 0 var(--hn-teal); }
+  .nav-sep { height:1px; background:rgba(255,255,255,.07); margin:10px 12px; }
+  .sb-foot { margin-top:auto; padding:10px 8px 16px; }
+
+  /* ---------- main ---------- */
+  .main { flex:1; display:flex; flex-direction:column; min-width:0; }
+  .topbar { height:52px; background:#fff; border-bottom:1px solid var(--hn-border); display:flex; align-items:center;
+            gap:14px; padding:0 18px; }
+  .crumbs { font-size:12.5px; color:var(--hn-ink-2); display:flex; align-items:center; gap:7px; }
+  .crumbs a { color:var(--hn-primary); text-decoration:none; }
+  .crumbs .sep { color:var(--hn-ink-3); }
+  .spacer { flex:1; }
+  .whatsnew { position:relative; cursor:pointer; font-size:16px; color:var(--hn-ink-2);
+              width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; }
+  .whatsnew:hover { background:#f0f3f7; }
+  .whatsnew .dot { position:absolute; top:5px; right:5px; min-width:15px; height:15px; padding:0 3px; border-radius:20px;
+                   background:#e5484d; color:#fff; font-size:9px; font-weight:800; display:flex; align-items:center; justify-content:center;
+                   border:2px solid #fff; }
+  .ic-btn { width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+            color:var(--hn-ink-2); cursor:pointer; }
+  .ic-btn:hover { background:#f0f3f7; }
+  .av { width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,#6938ef,#00ade4); color:#fff;
+        display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+
+  .content { padding:22px 26px; overflow:auto; }
+  .page-head { display:flex; align-items:center; margin-bottom:18px; }
+  .page-head h1 { font-size:20px; font-weight:700; }
+  .page-head .ha { margin-left:auto; display:flex; gap:9px; }
+  .btn { border:none; border-radius:8px; padding:8px 15px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;
+         display:inline-flex; align-items:center; gap:7px; text-decoration:none; }
+  .btn-primary { background:var(--hn-primary); color:#fff; }
+  .btn-primary:hover { background:#0263b0; }
+  .btn-ghost { background:#fff; color:var(--hn-ink-2); border:1px solid var(--hn-border-strong); }
+  .btn-ghost:hover { border-color:var(--hn-primary); color:var(--hn-primary); }
+  .btn-green { background:var(--hn-green); color:#fff; }
+  .btn-green:hover { filter:brightness(1.05); }
+
+  .toolbar { display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+  .search { flex:1; max-width:280px; border:1px solid var(--hn-border-strong); border-radius:8px; padding:7px 12px;
+            font-size:13px; color:var(--hn-ink); background:#fff; }
+  .select { font-size:12.5px; color:var(--hn-ink-2); background:#fff; border:1px solid var(--hn-border-strong);
+            border-radius:8px; padding:7px 11px; cursor:pointer; }
+
+  /* ---------- pipelines table ---------- */
+  .card { background:#fff; border:1px solid var(--hn-border); border-radius:12px; box-shadow:var(--hn-shadow); overflow:hidden; }
+  table { width:100%; border-collapse:collapse; }
+  thead th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--hn-ink-3);
+             font-weight:700; padding:12px 16px; background:#fafbfc; border-bottom:1px solid var(--hn-border); }
+  tbody td { padding:14px 16px; border-bottom:1px solid var(--hn-border); font-size:13px; }
+  tbody tr:last-child td { border-bottom:none; }
+  tbody tr:hover { background:#fafcff; }
+  .p-name { font-weight:600; color:var(--hn-primary); cursor:pointer; }
+  .p-sub { font-size:11.5px; color:var(--hn-ink-3); margin-top:2px; }
+  .st { font-size:11px; font-weight:700; padding:2px 9px; border-radius:20px; display:inline-flex; align-items:center; gap:5px; }
+  .st::before { content:""; width:6px; height:6px; border-radius:50%; }
+  .st.ok { background:#e8f7ee; color:#227a44; } .st.ok::before { background:#4dc36b; }
+  .st.fail { background:#fdecec; color:#c2352f; } .st.fail::before { background:#e5484d; }
+  .st.run { background:#e7f1fd; color:#1666c1; } .st.run::before { background:#0278d5; }
+  .mini { font-size:12.5px; color:var(--hn-ink-2); }
+  .kebab { color:var(--hn-ink-3); cursor:pointer; font-weight:700; }
+
+  /* ================= CONTEXTUAL FEATURE NUDGE (bottom-right spotlight) ================= */
+  .nudge {
+    position:fixed; right:22px; bottom:22px; width:340px; z-index:80; background:#fff;
+    border:1px solid var(--hn-border); border-radius:14px; box-shadow:0 18px 50px rgba(11,19,43,.28);
+    overflow:hidden; animation:nudgeIn .45s cubic-bezier(.16,1,.3,1) .6s both;
+  }
+  @keyframes nudgeIn { from { transform:translateY(28px) scale(.97); opacity:0; } to { transform:none; opacity:1; } }
+  .nudge.hide { animation:nudgeOut .25s ease forwards; }
+  @keyframes nudgeOut { to { transform:translateY(20px); opacity:0; visibility:hidden; } }
+  .nudge::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px;
+                   background:linear-gradient(180deg,#6938ef,#00ade4); }
+  .nudge-body { padding:14px 15px 13px 18px; }
+  .nudge-eyebrow { display:flex; align-items:center; gap:7px; margin-bottom:7px; }
+  .nudge-eyebrow .spark { color:var(--hn-purple); font-size:13px; }
+  .nudge-eyebrow .lbl { font-size:11px; font-weight:700; color:var(--hn-purple); letter-spacing:.02em; }
+  .nudge-eyebrow .new { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.04em;
+                        background:var(--hn-new); color:var(--hn-new-ink); padding:2px 6px; border-radius:20px; }
+  .nudge .x { position:absolute; top:11px; right:12px; color:var(--hn-ink-3); cursor:pointer; font-size:15px; line-height:1; }
+  .nudge .x:hover { color:var(--hn-ink); }
+  .nudge h4 { font-size:14px; font-weight:700; margin-bottom:5px; padding-right:16px; }
+  .nudge p { font-size:12.5px; color:var(--hn-ink-2); line-height:1.5; margin-bottom:10px; }
+  .nudge-chips { display:flex; gap:6px; margin-bottom:12px; }
+  .chip { font-size:10.5px; color:var(--hn-ink-2); background:#f0f3f7; border:1px solid var(--hn-border);
+          padding:2px 8px; border-radius:6px; font-weight:600; }
+  .nudge-cta { display:flex; align-items:center; gap:8px; }
+  .nudge-cta .btn { padding:7px 12px; font-size:12px; }
+  .nudge-cta .later { margin-left:auto; font-size:12px; color:var(--hn-ink-3); cursor:pointer; font-weight:600; }
+  .nudge-cta .later:hover { color:var(--hn-ink-2); }
+  .ff-enabled-inline { font-size:12px; font-weight:700; color:var(--hn-new-ink); display:inline-flex; align-items:center; gap:5px; }
+
+  /* ================= What's New popover (archive entry) ================= */
+  .wn-pop { position:fixed; top:56px; right:74px; width:340px; z-index:90; background:#fff; border:1px solid var(--hn-border);
+            border-radius:12px; box-shadow:0 18px 50px rgba(11,19,43,.28); display:none; overflow:hidden; }
+  .wn-pop.open { display:block; animation:nudgeIn .18s ease both; }
+  .wn-head { display:flex; align-items:center; padding:12px 14px; border-bottom:1px solid var(--hn-border); }
+  .wn-head h4 { font-size:14px; font-weight:700; }
+  .wn-head .cnt { margin-left:8px; font-size:10px; font-weight:800; background:#e5484d; color:#fff; padding:1px 6px; border-radius:20px; }
+  .wn-head .allx { margin-left:auto; font-size:11.5px; color:var(--hn-ink-3); cursor:pointer; }
+  .wn-item { padding:11px 14px; border-bottom:1px solid var(--hn-border); cursor:pointer; }
+  .wn-item:hover { background:#fafcff; }
+  .wn-item .top { display:flex; align-items:center; gap:7px; margin-bottom:3px; }
+  .wn-item .bdg { font-size:9px; font-weight:800; text-transform:uppercase; padding:1px 6px; border-radius:20px; }
+  .wn-item .bdg.new { background:var(--hn-new); color:var(--hn-new-ink); }
+  .wn-item .bdg.imp { background:#e7f1fd; color:#1666c1; }
+  .wn-item .dt { margin-left:auto; font-size:10.5px; color:var(--hn-ink-3); }
+  .wn-item h5 { font-size:13px; font-weight:650; margin-bottom:2px; }
+  .wn-item p { font-size:11.5px; color:var(--hn-ink-3); line-height:1.4; }
+  .wn-foot { padding:10px 14px; text-align:center; }
+  .wn-foot a { font-size:12.5px; color:var(--hn-primary); font-weight:600; text-decoration:none; }
+
+  /* ================= Enable FF dialog + toast (shared) ================= */
+  .modal { position:fixed; inset:0; z-index:120; padding:24px; background:rgba(11,19,43,.45);
+           display:none; align-items:center; justify-content:center; }
+  .modal.open { display:flex; }
+  .dialog { background:#fff; width:460px; max-width:100%; border-radius:12px; box-shadow:0 24px 70px rgba(0,0,0,.32);
+            overflow:hidden; animation:pop .16s ease; }
+  @keyframes pop { from { transform:translateY(10px); opacity:0; } to { transform:none; opacity:1; } }
+  .dhead { display:flex; align-items:center; padding:16px 20px; border-bottom:1px solid var(--hn-border); }
+  .dhead h3 { font-size:16px; font-weight:700; }
+  .dhead .x { margin-left:auto; color:var(--hn-ink-3); cursor:pointer; font-size:16px; }
+  .dbody { padding:16px 20px; }
+  .dbody .lead { font-size:13px; color:var(--hn-ink-2); line-height:1.5; }
+  .dbody .lead b { color:var(--hn-ink); }
+  .summary { margin-top:14px; border:1px solid var(--hn-border); border-radius:10px; overflow:hidden; }
+  .summary .row { display:flex; justify-content:space-between; padding:9px 13px; font-size:12.5px; border-bottom:1px solid var(--hn-border); }
+  .summary .row:last-child { border-bottom:none; }
+  .summary .row .k { color:var(--hn-ink-3); } .summary .row .v { font-weight:600; }
+  .summary .row .v code { font-family:ui-monospace,Menlo,monospace; font-size:11.5px; background:#f0f3f7; padding:1px 6px; border-radius:5px; }
+  .dfoot { display:flex; gap:10px; justify-content:flex-end; padding:13px 20px; border-top:1px solid var(--hn-border); background:#fafbfc; }
+  .toast-wrap { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:8px; }
+  .toast { background:#0b132b; color:#fff; font-size:12.5px; padding:10px 16px; border-radius:8px;
+           box-shadow:0 8px 28px rgba(11,19,43,.35); display:flex; align-items:center; gap:8px; animation:pop .18s ease; }
+  .toast .ok { color:#6ee08a; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <div class="sb-top">
+      <span class="sb-new">NEW</span>
+      <div class="sb-logo">⇄</div>
+      <div class="mod">Continuous Integration<small>&amp; Build</small></div>
+    </div>
+    <div class="sb-proj">
+      <div><small>Project</small><b>akshit-devrel-harness</b></div>
+      <span class="cx">›</span>
+    </div>
+    <nav class="nav">
+      <a href="#"><span class="ic">▦</span> Overview</a>
+      <a href="#" class="active"><span class="ic">⇄</span> Pipelines</a>
+      <a href="#"><span class="ic">▤</span> Executions</a>
+      <a href="#"><span class="ic">◈</span> Build Infrastructure</a>
+      <a href="#"><span class="ic">◉</span> Test Intelligence</a>
+      <a href="#"><span class="ic">⑂</span> Artifacts</a>
+      <div class="nav-sep"></div>
+      <a href="#"><span class="ic">◆</span> Engagement <span style="font-size:8px;background:#6938ef;color:#fff;padding:1px 5px;border-radius:4px;margin-left:auto;">NEW</span></a>
+      <a href="#"><span class="ic">⚙</span> Project Settings</a>
+    </nav>
+    <div class="sb-foot"></div>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <div class="main">
+    <div class="topbar">
+      <div class="crumbs">
+        <a href="#">Account: satwell-demo</a><span class="sep">›</span>
+        <a href="#">Organization: default</a><span class="sep">›</span>
+        <a href="#">Project: Default Project</a>
+      </div>
+      <div class="spacer"></div>
+      <div class="whatsnew" id="wnBell" title="What's New">🔔<span class="dot" id="wnDot">1</span></div>
+      <div class="ic-btn">?</div>
+      <div class="av">AM</div>
+    </div>
+
+    <div class="content">
+      <div class="page-head">
+        <h1>Pipelines</h1>
+        <div class="ha">
+          <a href="#" class="btn btn-ghost">⚙ Manage</a>
+          <a href="#" class="btn btn-primary">＋ Create a Pipeline</a>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <input class="search" placeholder="Search pipelines" />
+        <span class="select">All Statuses ▾</span>
+        <span class="select">Last 30 days ▾</span>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Pipeline</th><th>Last Execution</th><th>Last Run</th><th>Total Runs</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="p-name">build-and-push-service</div><div class="p-sub">CI · main</div></td>
+              <td><span class="st ok">Success</span></td>
+              <td class="mini">12 min ago</td>
+              <td class="mini">342</td>
+              <td><span class="kebab">⋮</span></td>
+            </tr>
+            <tr>
+              <td><div class="p-name">integration-tests</div><div class="p-sub">CI · develop</div></td>
+              <td><span class="st fail">Failed</span></td>
+              <td class="mini">1 hour ago</td>
+              <td class="mini">1,208</td>
+              <td><span class="kebab">⋮</span></td>
+            </tr>
+            <tr>
+              <td><div class="p-name">nightly-cache-warm</div><div class="p-sub">CI · main</div></td>
+              <td><span class="st run">Running</span></td>
+              <td class="mini">just now</td>
+              <td class="mini">76</td>
+              <td><span class="kebab">⋮</span></td>
+            </tr>
+            <tr>
+              <td><div class="p-name">docker-multiarch-build</div><div class="p-sub">CI · release/*</div></td>
+              <td><span class="st ok">Success</span></td>
+              <td class="mini">5 hours ago</td>
+              <td class="mini">419</td>
+              <td><span class="kebab">⋮</span></td>
+            </tr>
+            <tr>
+              <td><div class="p-name">lint-and-sca</div><div class="p-sub">CI · main</div></td>
+              <td><span class="st ok">Success</span></td>
+              <td class="mini">yesterday</td>
+              <td class="mini">903</td>
+              <td><span class="kebab">⋮</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== CONTEXTUAL NUDGE (bottom-right) ===================== -->
+<!-- Shows because: card.module == CI (this page) AND released recently AND user has no impression yet -->
+<div class="nudge" id="nudge">
+  <span class="x" id="nudgeClose" title="Dismiss">✕</span>
+  <div class="nudge-body">
+    <div class="nudge-eyebrow">
+      <span class="spark">✨</span><span class="lbl">New in CI · relevant to this page</span><span class="new">New</span>
+    </div>
+    <h4>Pipeline Caching Enhancements</h4>
+    <p>Cut build times with selective caching &amp; smarter cache restoration — for the pipelines you're looking at right now.</p>
+    <div class="nudge-chips"><span class="chip">CI</span><span class="chip">Performance</span><span class="chip">⚑ Feature Flag</span></div>
+    <div class="nudge-cta" id="nudgeCta">
+      <button class="btn btn-green" id="nudgeEnable">⚑ Enable FF</button>
+      <a href="#" class="btn btn-ghost" id="nudgeDocs">View Docs</a>
+      <span class="later" id="nudgeLater">Not now</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== What's New popover (archive entry) ===================== -->
+<div class="wn-pop" id="wnPop">
+  <div class="wn-head">
+    <h4>What's New</h4><span class="cnt" id="wnCnt">1 new</span>
+    <span class="allx" id="wnMarkAll">Mark all read</span>
+  </div>
+  <div class="wn-item">
+    <div class="top"><span class="bdg new">New</span><span class="dt">2h ago</span></div>
+    <h5>Pipeline Caching Enhancements</h5>
+    <p>Selective caching &amp; smarter restoration for faster CI builds.</p>
+  </div>
+  <div class="wn-item">
+    <div class="top"><span class="bdg new">New</span><span class="dt">Nov 5</span></div>
+    <h5>Custom Quality Gates</h5>
+    <p>Enforce code quality with flexible rule-based gates.</p>
+  </div>
+  <div class="wn-item">
+    <div class="top"><span class="bdg imp">Improved</span><span class="dt">Oct 28</span></div>
+    <h5>Pipeline Visual Studio UI Refresh</h5>
+    <p>Faster, cleaner pipeline visualization with better search.</p>
+  </div>
+  <div class="wn-foot"><a href="#">View all in Engagement Hub →</a></div>
+</div>
+
+<!-- ===================== Enable FF dialog ===================== -->
+<div class="modal" id="ffModal">
+  <div class="dialog">
+    <div class="dhead"><h3>Enable Feature Flag</h3><span class="x js-ff-close">✕</span></div>
+    <div class="dbody">
+      <p class="lead">You're about to enable <b>Pipeline Caching Enhancements</b> for your account. It rolls out immediately to the environment below.</p>
+      <div class="summary">
+        <div class="row"><span class="k">Flag key</span><span class="v"><code>CI_CACHE_INTELLIGENCE</code></span></div>
+        <div class="row"><span class="k">Account</span><span class="v">satwell-demo</span></div>
+        <div class="row"><span class="k">Environment</span><span class="v">Production</span></div>
+        <div class="row"><span class="k">Targets</span><span class="v">100% · ON</span></div>
+      </div>
+    </div>
+    <div class="dfoot">
+      <button class="btn btn-ghost js-ff-close">Cancel</button>
+      <button class="btn btn-green" id="ffConfirm">Enable Flag</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+  const toastWrap = document.getElementById('toastWrap');
+  function toast(msg, ok=true){
+    const t=document.createElement('div'); t.className='toast';
+    t.innerHTML=(ok?'<span class="ok">✓</span> ':'')+msg; toastWrap.appendChild(t);
+    setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';},2200);
+    setTimeout(()=>t.remove(),2600);
+  }
+
+  // ----- impression tracking (per user+card). Dismiss/act => suppress. -----
+  const nudge = document.getElementById('nudge');
+  function recordImpression(kind){
+    // POST /feature-feed/{id}/impression { state: kind }  (mocked)
+    nudge.classList.add('hide');
+    document.getElementById('wnDot').style.display='none';
+    document.getElementById('wnCnt').textContent='0 new';
+  }
+  document.getElementById('nudgeClose').addEventListener('click', ()=>{ recordImpression('dismissed'); });
+  document.getElementById('nudgeLater').addEventListener('click', ()=>{ recordImpression('dismissed'); });
+  document.getElementById('nudgeDocs').addEventListener('click', e=>{ e.preventDefault(); toast('Opening documentation ↗'); recordImpression('clicked'); });
+
+  // ----- Enable FF from the nudge -----
+  const ffModal=document.getElementById('ffModal');
+  document.getElementById('nudgeEnable').addEventListener('click', ()=> ffModal.classList.add('open'));
+  document.querySelectorAll('.js-ff-close').forEach(el=>el.addEventListener('click', ()=>ffModal.classList.remove('open')));
+  ffModal.addEventListener('click', e=>{ if(e.target===ffModal) ffModal.classList.remove('open'); });
+  document.getElementById('ffConfirm').addEventListener('click', ()=>{
+    ffModal.classList.remove('open');
+    const cta=document.getElementById('nudgeCta');
+    cta.innerHTML='<span class="ff-enabled-inline">✓ Feature flag enabled for satwell-demo</span>';
+    toast('Feature flag <b style="margin-left:3px">CI_CACHE_INTELLIGENCE</b> enabled');
+    setTimeout(()=>recordImpression('acted'), 1600);
+  });
+
+  // ----- What's New bell => archive popover -----
+  const wnPop=document.getElementById('wnPop');
+  document.getElementById('wnBell').addEventListener('click', e=>{ e.stopPropagation(); wnPop.classList.toggle('open'); });
+  document.addEventListener('click', e=>{ if(!wnPop.contains(e.target)) wnPop.classList.remove('open'); });
+  document.getElementById('wnMarkAll').addEventListener('click', ()=>{
+    document.getElementById('wnDot').style.display='none';
+    document.getElementById('wnCnt').textContent='0 new'; toast('Marked all as read');
+  });
+
+  // ----- misc demo clickables -----
+  document.querySelectorAll('.p-name').forEach(p=>p.addEventListener('click', ()=>toast('Opening pipeline ↗')));
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ ffModal.classList.remove('open'); wnPop.classList.remove('open'); }});
+</script>
+</body>
+</html>
