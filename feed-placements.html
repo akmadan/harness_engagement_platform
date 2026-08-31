@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Harness · Feature Feed — non-intrusive placements</title>
+<title>Harness · Pipelines — right-rail Feature Feed</title>
 <style>
   :root {
     --hn-bg:#f4f6f8; --hn-surface:#fff; --hn-nav:#0b1728; --hn-nav-2:#122238;
@@ -12,7 +12,6 @@
     --hn-primary:#0278d5; --hn-green:#4dc36b; --hn-teal:#00ade4; --hn-purple:#6938ef;
     --hn-new:#e8f7ee; --hn-new-ink:#227a44; --hn-imp:#e7f1fd; --hn-imp-ink:#1666c1;
     --hn-shadow:0 1px 2px rgba(11,19,43,.06),0 1px 3px rgba(11,19,43,.05);
-    --hn-shadow-lg:0 4px 16px rgba(11,19,43,.10);
   }
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
@@ -21,7 +20,7 @@
 
   /* ---------- sidebar ---------- */
   .sidebar { width:236px; background:var(--hn-nav); color:#c7d2e0; display:flex; flex-direction:column; flex-shrink:0; }
-  .sb-top { display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.07); position:relative; }
+  .sb-top { display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.07); }
   .sb-logo { width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,#6938ef,#00ade4);
              display:flex; align-items:center; justify-content:center; font-size:15px; color:#fff; }
   .sb-top .mod { font-size:14px; font-weight:700; color:#fff; line-height:1.15; }
@@ -59,24 +58,10 @@
   .av { width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,#6938ef,#00ade4); color:#fff;
         display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
 
-  .content { padding:18px 26px 40px; overflow:auto; }
-
-  /* ---------- demo switcher (not part of product) ---------- */
-  .switch { display:flex; align-items:center; gap:10px; background:#eef1f5; border:1px solid var(--hn-border);
-            border-radius:12px; padding:8px 10px; margin-bottom:20px; flex-wrap:wrap; }
-  .switch .lbl { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--hn-ink-3);
-                 padding:0 6px; }
-  .seg { display:flex; gap:4px; background:#fff; border:1px solid var(--hn-border-strong); border-radius:9px; padding:3px; }
-  .seg button { border:none; background:transparent; font-family:inherit; font-size:12.5px; font-weight:600;
-                color:var(--hn-ink-2); padding:6px 12px; border-radius:6px; cursor:pointer; }
-  .seg button.active { background:var(--hn-purple); color:#fff; }
-  .seg button:not(.active):hover { background:#f0f3f7; }
-
-  .page-head { display:flex; align-items:center; margin-bottom:6px; }
+  .content { padding:22px 26px 40px; overflow:auto; }
+  .page-head { display:flex; align-items:center; margin-bottom:16px; }
   .page-head h1 { font-size:20px; font-weight:700; }
   .page-head .ha { margin-left:auto; display:flex; gap:9px; }
-  .view-note { font-size:12.5px; color:var(--hn-ink-3); margin-bottom:18px; }
-  .view-note b { color:var(--hn-new-ink); }
 
   .btn { border:none; border-radius:8px; padding:8px 15px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;
          display:inline-flex; align-items:center; gap:7px; text-decoration:none; }
@@ -88,123 +73,81 @@
   .btn-green:hover { filter:brightness(1.05); }
   .btn-sm { padding:6px 11px; font-size:12px; }
 
-  .card { background:#fff; border:1px solid var(--hn-border); border-radius:12px; box-shadow:var(--hn-shadow); }
+  .toolbar { display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+  .search { flex:1; max-width:280px; border:1px solid var(--hn-border-strong); border-radius:8px; padding:7px 12px;
+            font-size:13px; color:var(--hn-ink); background:#fff; }
+  .select { font-size:12.5px; color:var(--hn-ink-2); background:#fff; border:1px solid var(--hn-border-strong);
+            border-radius:8px; padding:7px 11px; cursor:pointer; }
 
-  /* ---------- shared ambient feature card ---------- */
-  .fcard { position:relative; background:#fff; border:1px solid var(--hn-border); border-radius:12px;
-           padding:15px 16px 14px; box-shadow:var(--hn-shadow); }
-  .fcard::before { content:""; position:absolute; left:0; top:14px; bottom:14px; width:3px; border-radius:3px;
-                   background:linear-gradient(180deg,#6938ef,#00ade4); }
-  .fcard .fc-x { position:absolute; top:11px; right:12px; color:var(--hn-ink-3); cursor:pointer; font-size:13px; }
-  .fcard .fc-x:hover { color:var(--hn-ink); }
-  .fc-eyebrow { display:flex; align-items:center; gap:7px; margin-bottom:6px; padding-left:8px; }
-  .bdg { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; padding:2px 6px; border-radius:20px; }
-  .bdg.new { background:var(--hn-new); color:var(--hn-new-ink); }
-  .bdg.imp { background:var(--hn-imp); color:var(--hn-imp-ink); }
-  .fc-eyebrow .mod { font-size:11px; font-weight:700; color:var(--hn-ink-3); }
-  .fcard h4 { font-size:14px; font-weight:700; margin-bottom:5px; padding-left:8px; padding-right:14px; }
-  .fcard p { font-size:12.5px; color:var(--hn-ink-2); line-height:1.5; margin-bottom:11px; padding-left:8px; }
-  .chips { display:flex; gap:6px; margin-bottom:12px; padding-left:8px; flex-wrap:wrap; }
-  .chip { font-size:10.5px; color:var(--hn-ink-2); background:#f0f3f7; border:1px solid var(--hn-border);
-          padding:2px 8px; border-radius:6px; font-weight:600; }
-  .fc-cta { display:flex; align-items:center; gap:8px; padding-left:8px; flex-wrap:wrap; }
-  .ff-enabled-inline { font-size:12px; font-weight:700; color:var(--hn-new-ink); display:inline-flex; align-items:center; gap:5px; }
-
-  /* views */
-  .view { display:none; }
-  .view.active { display:block; }
-
-  /* ===== 1. EMPTY STATE ===== */
-  .empty { border:1px dashed var(--hn-border-strong); border-radius:14px; background:#fff; padding:44px 24px 26px; text-align:center; }
-  .empty .ill { width:64px; height:64px; margin:0 auto 14px; border-radius:16px; background:#f0f3f7;
-                display:flex; align-items:center; justify-content:center; font-size:30px; }
-  .empty h2 { font-size:17px; font-weight:700; margin-bottom:6px; }
-  .empty p { font-size:13px; color:var(--hn-ink-3); max-width:420px; margin:0 auto 16px; line-height:1.5; }
-  .zero-feed { margin-top:26px; border-top:1px solid var(--hn-border); padding-top:20px; text-align:left; }
-  .zero-feed .zh { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
-  .zero-feed .zh .spark { color:var(--hn-purple); }
-  .zero-feed .zh b { font-size:13px; font-weight:700; }
-  .zero-feed .zh .muted { font-size:12px; color:var(--hn-ink-3); }
-  .zero-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-
-  /* ===== 2. OVERVIEW STRIP ===== */
-  .stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
-  .stat { background:#fff; border:1px solid var(--hn-border); border-radius:12px; padding:15px 16px; box-shadow:var(--hn-shadow); }
-  .stat .k { font-size:11px; color:var(--hn-ink-3); text-transform:uppercase; letter-spacing:.05em; font-weight:700; }
-  .stat .v { font-size:24px; font-weight:750; margin-top:6px; }
-  .stat .d { font-size:11.5px; margin-top:4px; color:var(--hn-new-ink); font-weight:600; }
-  .strip { background:linear-gradient(180deg,#faf9ff,#fff); border:1px solid var(--hn-border); border-radius:14px; padding:16px; }
-  .strip-head { display:flex; align-items:center; gap:8px; margin-bottom:13px; }
-  .strip-head .spark { color:var(--hn-purple); }
-  .strip-head h3 { font-size:14px; font-weight:700; }
-  .strip-head .viewall { margin-left:auto; font-size:12px; font-weight:600; color:var(--hn-primary); cursor:pointer; text-decoration:none; }
-  .strip-track { display:flex; gap:14px; overflow-x:auto; padding-bottom:4px; }
-  .strip-track .fcard { min-width:300px; flex:0 0 auto; }
-
-  /* ===== 3. INLINE CALLOUT ===== */
-  .settings-wrap { display:grid; grid-template-columns:200px 1fr; gap:24px; }
-  .settings-tabs { display:flex; flex-direction:column; gap:2px; }
-  .settings-tabs a { padding:9px 12px; border-radius:8px; font-size:13px; color:var(--hn-ink-2); text-decoration:none; }
-  .settings-tabs a.active { background:#eaf3fc; color:var(--hn-primary); font-weight:600; }
-  .settings-panel { max-width:640px; }
-  .fld { margin-bottom:18px; }
-  .fld label { display:block; font-size:12.5px; font-weight:600; margin-bottom:6px; }
-  .fld .desc { font-size:11.5px; color:var(--hn-ink-3); margin-bottom:8px; }
-  .fld input[type=text], .fld select { width:100%; border:1px solid var(--hn-border-strong); border-radius:8px; padding:8px 11px;
-                                        font-size:13px; font-family:inherit; }
-  .toggle-row { display:flex; align-items:center; gap:10px; }
-  .tg { width:38px; height:22px; border-radius:20px; background:#cdd5df; position:relative; cursor:pointer; flex-shrink:0; }
-  .tg::after { content:""; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; transition:.15s; }
-  .tg.on { background:var(--hn-green); } .tg.on::after { left:18px; }
-  /* the co-located callout */
-  .callout { position:relative; display:flex; gap:12px; background:#faf6ff; border:1px solid #e4d8ff; border-left:3px solid var(--hn-purple);
-             border-radius:10px; padding:13px 15px; margin:6px 0 4px; }
-  .callout .ci { font-size:16px; color:var(--hn-purple); line-height:1.3; }
-  .callout .cx { position:absolute; top:9px; right:11px; color:var(--hn-ink-3); cursor:pointer; font-size:12px; }
-  .callout .cx:hover { color:var(--hn-ink); }
-  .callout .ctitle { font-size:12.5px; font-weight:700; margin-bottom:3px; }
-  .callout .ctitle .bdg { margin-left:6px; }
-  .callout p { font-size:12px; color:var(--hn-ink-2); line-height:1.45; margin-bottom:9px; padding-right:16px; }
-  .callout .cc-cta { display:flex; gap:8px; align-items:center; }
-  .callout .cc-cta a.link { font-size:12px; color:var(--hn-primary); font-weight:600; text-decoration:none; }
-
-  /* ===== 4. RIGHT RAIL ===== */
+  /* ---------- two-column: pipelines + right rail ---------- */
   .two-col { display:flex; gap:20px; align-items:flex-start; }
   .col-main { flex:1; min-width:0; }
-  .rail { width:300px; flex-shrink:0; background:#fff; border:1px solid var(--hn-border); border-radius:14px;
+
+  /* pipelines table */
+  .card { background:#fff; border:1px solid var(--hn-border); border-radius:12px; box-shadow:var(--hn-shadow); overflow:hidden; }
+  table { width:100%; border-collapse:collapse; }
+  thead th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--hn-ink-3);
+             font-weight:700; padding:12px 16px; background:#fafbfc; border-bottom:1px solid var(--hn-border); }
+  tbody td { padding:13px 16px; border-bottom:1px solid var(--hn-border); font-size:13px; }
+  tbody tr:last-child td { border-bottom:none; }
+  tbody tr:hover { background:#fafcff; }
+  .p-name { font-weight:600; color:var(--hn-primary); cursor:pointer; }
+  .p-sub { font-size:11.5px; color:var(--hn-ink-3); margin-top:2px; }
+  .st { font-size:11px; font-weight:700; padding:2px 9px; border-radius:20px; display:inline-flex; align-items:center; gap:5px; }
+  .st::before { content:""; width:6px; height:6px; border-radius:50%; }
+  .st.ok { background:#e8f7ee; color:#227a44; } .st.ok::before { background:#4dc36b; }
+  .st.fail { background:#fdecec; color:#c2352f; } .st.fail::before { background:#e5484d; }
+  .st.run { background:#e7f1fd; color:#1666c1; } .st.run::before { background:#0278d5; }
+  .mini { font-size:12.5px; color:var(--hn-ink-2); }
+  .kebab { color:var(--hn-ink-3); cursor:pointer; font-weight:700; }
+  .tbl-foot { display:flex; align-items:center; padding:11px 16px; font-size:12px; color:var(--hn-ink-3); background:#fafbfc;
+              border-top:1px solid var(--hn-border); }
+  .tbl-foot .pager { margin-left:auto; display:flex; gap:6px; }
+  .tbl-foot .pg { border:1px solid var(--hn-border-strong); background:#fff; border-radius:6px; padding:3px 9px; cursor:pointer; font-weight:600; color:var(--hn-ink-2); }
+  .tbl-foot .pg.active { background:var(--hn-primary); color:#fff; border-color:var(--hn-primary); }
+
+  /* ================= RIGHT RAIL (Feature Feed) ================= */
+  .rail { width:312px; flex-shrink:0; background:#fff; border:1px solid var(--hn-border); border-radius:14px;
           box-shadow:var(--hn-shadow); overflow:hidden; transition:width .18s ease; }
-  .rail-head { display:flex; align-items:center; gap:8px; padding:13px 14px; border-bottom:1px solid var(--hn-border); }
+  .rail-head { display:flex; align-items:center; gap:8px; padding:13px 15px; border-bottom:1px solid var(--hn-border);
+               background:linear-gradient(180deg,#faf9ff,#fff); }
   .rail-head .spark { color:var(--hn-purple); }
   .rail-head h3 { font-size:13.5px; font-weight:700; }
   .rail-head .rc { margin-left:auto; cursor:pointer; color:var(--hn-ink-3); font-size:15px; width:24px; height:24px;
                    display:flex; align-items:center; justify-content:center; border-radius:6px; }
   .rail-head .rc:hover { background:#f0f3f7; color:var(--hn-ink); }
-  .rail-item { padding:12px 14px; border-bottom:1px solid var(--hn-border); cursor:pointer; }
-  .rail-item:last-of-type { border-bottom:none; }
-  .rail-item:hover { background:#fafcff; }
-  .rail-item .top { display:flex; align-items:center; gap:7px; margin-bottom:4px; }
-  .rail-item .dt { margin-left:auto; font-size:10.5px; color:var(--hn-ink-3); }
-  .rail-item h5 { font-size:12.5px; font-weight:650; margin-bottom:2px; }
-  .rail-item p { font-size:11.5px; color:var(--hn-ink-3); line-height:1.4; }
-  .rail-item .mini-cta { margin-top:8px; display:flex; gap:7px; }
-  .rail-foot { padding:10px 14px; text-align:center; }
-  .rail-foot a { font-size:12px; color:var(--hn-primary); font-weight:600; text-decoration:none; }
-  /* collapsed state -> thin vertical tab */
+  .rail-collapsed-badge { display:none; }
+
+  .fcard { position:relative; padding:15px 15px 14px; border-bottom:1px solid var(--hn-border); }
+  .fcard::before { content:""; position:absolute; left:0; top:15px; bottom:15px; width:3px; border-radius:3px;
+                   background:linear-gradient(180deg,#6938ef,#00ade4); }
+  .fcard .fc-x { position:absolute; top:12px; right:13px; color:var(--hn-ink-3); cursor:pointer; font-size:13px; }
+  .fcard .fc-x:hover { color:var(--hn-ink); }
+  .fc-eyebrow { display:flex; align-items:center; gap:7px; margin-bottom:6px; padding-left:9px; }
+  .bdg { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; padding:2px 6px; border-radius:20px; }
+  .bdg.new { background:var(--hn-new); color:var(--hn-new-ink); }
+  .bdg.imp { background:var(--hn-imp); color:var(--hn-imp-ink); }
+  .fc-eyebrow .mod { font-size:11px; font-weight:700; color:var(--hn-ink-3); }
+  .fc-eyebrow .dt { margin-left:auto; font-size:10.5px; color:var(--hn-ink-3); }
+  .fcard h4 { font-size:13.5px; font-weight:700; margin-bottom:5px; padding-left:9px; padding-right:14px; }
+  .fcard p { font-size:12px; color:var(--hn-ink-2); line-height:1.5; margin-bottom:11px; padding-left:9px; }
+  .chips { display:flex; gap:6px; margin-bottom:12px; padding-left:9px; flex-wrap:wrap; }
+  .chip { font-size:10.5px; color:var(--hn-ink-2); background:#f0f3f7; border:1px solid var(--hn-border);
+          padding:2px 8px; border-radius:6px; font-weight:600; }
+  .fc-cta { display:flex; align-items:center; gap:8px; padding-left:9px; flex-wrap:wrap; }
+  .ff-enabled-inline { font-size:12px; font-weight:700; color:var(--hn-new-ink); display:inline-flex; align-items:center; gap:5px; padding-left:9px; }
+  .rail-foot { padding:12px 15px; text-align:center; }
+  .rail-foot .btn { width:100%; justify-content:center; }
+
+  /* collapsed -> thin vertical tab */
   .rail.collapsed { width:44px; }
-  .rail.collapsed .rail-head h3, .rail.collapsed .rail-item, .rail.collapsed .rail-foot { display:none; }
+  .rail.collapsed .rail-head h3, .rail.collapsed .fcard, .rail.collapsed .rail-foot { display:none; }
   .rail.collapsed .rail-head { flex-direction:column; padding:12px 0; border-bottom:none; gap:10px; }
   .rail.collapsed .rail-head .spark { font-size:16px; }
-  .rail-collapsed-badge { display:none; }
   .rail.collapsed .rail-collapsed-badge { display:block; writing-mode:vertical-rl; transform:rotate(180deg);
      font-size:10px; font-weight:800; letter-spacing:.08em; color:var(--hn-purple); text-transform:uppercase; }
 
-  /* filler blocks for realism */
-  .blk { background:#fff; border:1px solid var(--hn-border); border-radius:12px; box-shadow:var(--hn-shadow); padding:16px; margin-bottom:14px; }
-  .blk h3 { font-size:14px; font-weight:700; margin-bottom:12px; }
-  .bar { height:11px; background:#eef1f5; border-radius:6px; margin-bottom:9px; }
-  .bar.w70 { width:70%; } .bar.w50 { width:50%; } .bar.w85 { width:85%; } .bar.w40 { width:40%; }
-
-  /* ===== Enable FF dialog + toast (shared) ===== */
+  /* ================= Enable FF dialog + toast (shared) ================= */
   .modal { position:fixed; inset:0; z-index:120; padding:24px; background:rgba(11,19,43,.45);
            display:none; align-items:center; justify-content:center; }
   .modal.open { display:flex; }
@@ -242,8 +185,8 @@
       <span class="cx">›</span>
     </div>
     <nav class="nav">
-      <a href="#" id="navOverview"><span class="ic">▦</span> Overview</a>
-      <a href="#" id="navPipelines" class="active"><span class="ic">⇄</span> Pipelines</a>
+      <a href="#"><span class="ic">▦</span> Overview</a>
+      <a href="#" class="active"><span class="ic">⇄</span> Pipelines</a>
       <a href="#"><span class="ic">▤</span> Executions</a>
       <a href="#"><span class="ic">◈</span> Build Infrastructure</a>
       <a href="#"><span class="ic">◉</span> Test Intelligence</a>
@@ -260,229 +203,104 @@
       <div class="crumbs">
         <a href="#">Account: satwell-demo</a><span class="sep">›</span>
         <a href="#">Organization: default</a><span class="sep">›</span>
-        <a href="#" id="crumbLeaf">Project: Default Project</a>
+        <a href="#">Project: Default Project</a>
       </div>
       <div class="spacer"></div>
-      <div class="whatsnew" title="What's New">🔔<span class="dot">3</span></div>
+      <div class="whatsnew" title="What's New">🔔<span class="dot">2</span></div>
       <div class="ic-btn">?</div>
       <div class="av">AM</div>
     </div>
 
     <div class="content">
-      <!-- DEMO SWITCHER (remove in product) -->
-      <div class="switch">
-        <span class="lbl">Placement demo</span>
-        <div class="seg" id="seg">
-          <button data-v="1" class="active">1 · Empty state</button>
-          <button data-v="2">2 · Overview strip</button>
-          <button data-v="3">3 · Inline callout</button>
-          <button data-v="4">4 · Right rail</button>
+      <div class="page-head">
+        <h1>Pipelines</h1>
+        <div class="ha">
+          <a href="#" class="btn btn-ghost">⚙ Manage</a>
+          <a href="#" class="btn btn-primary">＋ Create a Pipeline</a>
         </div>
       </div>
 
-      <!-- ================= VIEW 1: EMPTY STATE ================= -->
-      <section class="view active" data-view="1">
-        <div class="page-head">
-          <h1>Pipelines</h1>
-          <div class="ha"><a href="#" class="btn btn-primary">＋ Create a Pipeline</a></div>
-        </div>
-        <p class="view-note"><b>Zero interruption.</b> Dead real estate the user is already staring at while deciding what to do next. Nothing to interrupt — the card is genuinely helpful here.</p>
+      <div class="toolbar">
+        <input class="search" placeholder="Search pipelines" />
+        <span class="select">All Statuses ▾</span>
+        <span class="select">All Branches ▾</span>
+        <span class="select">Last 30 days ▾</span>
+      </div>
 
-        <div class="empty">
-          <div class="ill">⇄</div>
-          <h2>No pipelines yet</h2>
-          <p>Create your first pipeline to build, test, and push artifacts. You can start from a template or import from YAML.</p>
-          <a href="#" class="btn btn-primary" style="margin:0 auto;">＋ Create a Pipeline</a>
-
-          <div class="zero-feed">
-            <div class="zh"><span class="spark">✨</span><b>While you're here — new in CI</b><span class="muted">· picked for this module</span></div>
-            <div class="zero-grid">
-              <div class="fcard" data-card="c1">
-                <span class="fc-x" title="Dismiss">✕</span>
-                <div class="fc-eyebrow"><span class="bdg new">New</span><span class="mod">CI</span></div>
-                <h4>Pipeline Caching Enhancements</h4>
-                <p>Cut build times with selective caching &amp; smarter cache restoration.</p>
-                <div class="chips"><span class="chip">Performance</span><span class="chip">⚑ Feature Flag</span></div>
-                <div class="fc-cta">
-                  <button class="btn btn-green btn-sm js-ff" data-flag="CI_CACHE_INTELLIGENCE" data-title="Pipeline Caching Enhancements">⚑ Enable FF</button>
-                  <a href="#" class="btn btn-ghost btn-sm js-docs">View Docs</a>
-                </div>
-              </div>
-              <div class="fcard" data-card="c2">
-                <span class="fc-x" title="Dismiss">✕</span>
-                <div class="fc-eyebrow"><span class="bdg new">New</span><span class="mod">CI</span></div>
-                <h4>Custom Quality Gates</h4>
-                <p>Fail pipelines on your own policy thresholds: coverage, vulnerabilities, or custom metrics.</p>
-                <div class="chips"><span class="chip">Quality</span><span class="chip">⚑ Feature Flag</span></div>
-                <div class="fc-cta">
-                  <button class="btn btn-green btn-sm js-ff" data-flag="CI_CUSTOM_QUALITY_GATES" data-title="Custom Quality Gates">⚑ Enable FF</button>
-                  <a href="#" class="btn btn-ghost btn-sm js-docs">View Docs</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ================= VIEW 2: OVERVIEW STRIP ================= -->
-      <section class="view" data-view="2">
-        <div class="page-head"><h1>CI Overview</h1></div>
-        <p class="view-note"><b>Ambient.</b> A quiet horizontal row on a page the user lands on anyway. Always present, never pops in, easy to scroll past.</p>
-
-        <div class="stat-grid">
-          <div class="stat"><div class="k">Builds today</div><div class="v">128</div><div class="d">▲ 12% vs last week</div></div>
-          <div class="stat"><div class="k">Success rate</div><div class="v">94%</div><div class="d">▲ 3 pts</div></div>
-          <div class="stat"><div class="k">Avg duration</div><div class="v">6m 20s</div><div class="d" style="color:var(--hn-imp-ink)">▼ 40s faster</div></div>
-          <div class="stat"><div class="k">Active pipelines</div><div class="v">37</div><div class="d" style="color:var(--hn-ink-3);font-weight:500">across 6 repos</div></div>
-        </div>
-
-        <div class="strip">
-          <div class="strip-head">
-            <span class="spark">✨</span><h3>Recently shipped in CI</h3>
-            <a href="#" class="viewall js-viewall">View all →</a>
-          </div>
-          <div class="strip-track">
-            <div class="fcard">
-              <div class="fc-eyebrow"><span class="bdg new">New</span><span class="mod">CI · 2d ago</span></div>
-              <h4>Pipeline Caching Enhancements</h4>
-              <p>Cut build times with selective caching &amp; smarter restoration.</p>
-              <div class="chips"><span class="chip">Performance</span><span class="chip">⚑ FF</span></div>
-              <div class="fc-cta">
-                <button class="btn btn-green btn-sm js-ff" data-flag="CI_CACHE_INTELLIGENCE" data-title="Pipeline Caching Enhancements">⚑ Enable FF</button>
-                <a href="#" class="btn btn-ghost btn-sm js-docs">Docs</a>
-              </div>
-            </div>
-            <div class="fcard">
-              <div class="fc-eyebrow"><span class="bdg new">New</span><span class="mod">CI · 5d ago</span></div>
-              <h4>Custom Quality Gates</h4>
-              <p>Enforce coverage &amp; security thresholds before a build passes.</p>
-              <div class="chips"><span class="chip">Quality</span><span class="chip">⚑ FF</span></div>
-              <div class="fc-cta">
-                <button class="btn btn-green btn-sm js-ff" data-flag="CI_CUSTOM_QUALITY_GATES" data-title="Custom Quality Gates">⚑ Enable FF</button>
-                <a href="#" class="btn btn-ghost btn-sm js-docs">Docs</a>
-              </div>
-            </div>
-            <div class="fcard">
-              <div class="fc-eyebrow"><span class="bdg imp">Improved</span><span class="mod">CI · 1w ago</span></div>
-              <h4>Matrix Strategy for Stages</h4>
-              <p>Fan out a stage across OS/version combinations in one config.</p>
-              <div class="chips"><span class="chip">Productivity</span></div>
-              <div class="fc-cta"><a href="#" class="btn btn-ghost btn-sm js-docs">View Docs</a></div>
-            </div>
-            <div class="fcard">
-              <div class="fc-eyebrow"><span class="bdg imp">Improved</span><span class="mod">CI · 2w ago</span></div>
-              <h4>Pipeline Studio UI Refresh</h4>
-              <p>Faster, cleaner visualization with better search.</p>
-              <div class="chips"><span class="chip">UX</span></div>
-              <div class="fc-cta"><a href="#" class="btn btn-ghost btn-sm js-docs">View Docs</a></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ================= VIEW 3: INLINE CALLOUT ================= -->
-      <section class="view" data-view="3">
-        <div class="page-head"><h1>build-and-push-service · Settings</h1></div>
-        <p class="view-note"><b>Pull, not push.</b> A passive banner co-located with the exact setting it's about. Discovered only when the user is already in that context — reads as help, not an ad.</p>
-
-        <div class="card" style="padding:20px 22px;">
-          <div class="settings-wrap">
-            <div class="settings-tabs">
-              <a href="#">General</a>
-              <a href="#" class="active">Build &amp; Cache</a>
-              <a href="#">Triggers</a>
-              <a href="#">Advanced</a>
-              <a href="#">Notifications</a>
-            </div>
-            <div class="settings-panel">
-              <div class="fld">
-                <label>Build infrastructure</label>
-                <div class="desc">Where build steps execute.</div>
-                <select><option>Harness Cloud (Linux · amd64)</option><option>Kubernetes</option></select>
-              </div>
-
-              <div class="fld">
-                <label>Caching</label>
-                <div class="desc">Reuse dependencies and layers across runs to speed up builds.</div>
-                <div class="toggle-row"><div class="tg" id="cacheTg"></div><span class="mini" style="font-size:12.5px;color:var(--hn-ink-2)">Enable build caching</span></div>
-
-                <!-- co-located feature callout -->
-                <div class="callout" id="callout3">
-                  <span class="cx" title="Dismiss">✕</span>
-                  <div class="ci">✨</div>
-                  <div>
-                    <div class="ctitle">Now available: selective caching<span class="bdg new">New</span></div>
-                    <p>Cache only the paths that change and restore them intelligently — teams see 30–50% faster builds on this exact setting.</p>
-                    <div class="cc-cta">
-                      <button class="btn btn-green btn-sm js-ff" data-flag="CI_CACHE_INTELLIGENCE" data-title="Selective Caching">⚑ Enable FF</button>
-                      <a href="#" class="link js-docs">Learn more</a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="fld">
-                <label>Cache key</label>
-                <div class="desc">Custom key expression (optional).</div>
-                <input type="text" placeholder="{{ checksum &quot;package-lock.json&quot; }}" />
-              </div>
-
-              <div style="display:flex;gap:10px;margin-top:22px;">
-                <button class="btn btn-primary">Save</button>
-                <button class="btn btn-ghost">Cancel</button>
+      <div class="two-col">
+        <!-- ===== LEFT: pipelines list (16 rows) ===== -->
+        <div class="col-main">
+          <div class="card">
+            <table>
+              <thead>
+                <tr><th>Pipeline</th><th>Last Execution</th><th>Last Run</th><th>Total Runs</th><th></th></tr>
+              </thead>
+              <tbody id="pipeRows">
+                <tr><td><div class="p-name">build-and-push-service</div><div class="p-sub">CI · main</div></td><td><span class="st ok">Success</span></td><td class="mini">12 min ago</td><td class="mini">342</td><td><span class="kebab">⋮</span></td></tr>
+                <tr><td><div class="p-name">integration-tests</div><div class="p-sub">CI · develop</div></td><td><span class="st fail">Failed</span></td><td class="mini">1 hour ago</td><td class="mini">1,208</td><td><span class="kebab">⋮</span></td></tr>
+                <tr><td><div class="p-name">nightly-cache-warm</div><div class="p-sub">CI · main</div></td><td><span class="st run">Running</span></td><td class="mini">just now</td><td class="mini">76</td><td><span class="kebab">⋮</span></td></tr>
+                <tr><td><div class="p-name">docker-multiarch-build</div><div class="p-sub">CI · release/*</div></td><td><span class="st ok">Success</span></td><td class="mini">5 hours ago</td><td class="mini">419</td><td><span class="kebab">⋮</span></td></tr>
+                <tr><td><div class="p-name">lint-and-sca</div><div class="p-sub">CI · main</div></td><td><span class="st ok">Success</span></td><td class="mini">yesterday</td><td class="mini">903</td><td><span class="kebab">⋮</span></td></tr>
+                <tr><td><div class="p-name">e2e-smoke-suite</div><div class="p-sub">CI · main</div></td><td><span class="st ok">Success</span></td><td class="mini">2 hours ago</td><td class="mini">610</td><td><span class="kebab">⋮</span></td></tr>
+                <tr><td><div class="p-name">frontend-bundle</div><div class="p-sub">CI · main</div></td><td><span class="st ok">Success</span></td><td class="mini">3 hours ago</td><td class="mini">1,554</td><td><span class="kebab">⋮</span></td></tr>
+                <tr><td><div class="p-name">api-contract-tests</div><div class="p-sub">CI · develop</div></td><td><span class="st fail">Failed</span></td><td class="mini">40 min ago</td><td class="mini">288</td><td><span class="kebab">⋮</span></td></tr>
+                <tr><td><div class="p-name">security-scan-sto</div><div class="p-sub">CI · main</div></td><td><span class="st ok">Success</span></td><td class="mini">6 hours ago</td><td class="mini">502</td><td><span class="kebab">⋮</span></td></tr>
+                <tr><td><div class="p-name">helm-package</div><div class="p-sub">CI · release/*</div></td><td><span class="st ok">Success</span></td><td class="mini">1 day ago</td><td class="mini">137</td><td><span class="kebab">⋮</span></td></tr>
+                <tr><td><div class="p-name">db-migration-check</div><div class="p-sub">CI · main</div></td><td><span class="st run">Running</span></td><td class="mini">just now</td><td class="mini">64</td><td><span class="kebab">⋮</span></td></tr>
+                <tr><td><div class="p-name">mobile-android-build</div><div class="p-sub">CI · main</div></td><td><span class="st ok">Success</span></td><td class="mini">8 hours ago</td><td class="mini">421</td><td><span class="kebab">⋮</span></td></tr>
+                <tr><td><div class="p-name">mobile-ios-build</div><div class="p-sub">CI · main</div></td><td><span class="st fail">Failed</span></td><td class="mini">8 hours ago</td><td class="mini">398</td><td><span class="kebab">⋮</span></td></tr>
+                <tr><td><div class="p-name">perf-benchmark</div><div class="p-sub">CI · main</div></td><td><span class="st ok">Success</span></td><td class="mini">2 days ago</td><td class="mini">92</td><td><span class="kebab">⋮</span></td></tr>
+                <tr><td><div class="p-name">docs-site-build</div><div class="p-sub">CI · main</div></td><td><span class="st ok">Success</span></td><td class="mini">4 hours ago</td><td class="mini">771</td><td><span class="kebab">⋮</span></td></tr>
+                <tr><td><div class="p-name">release-candidate</div><div class="p-sub">CI · release/*</div></td><td><span class="st ok">Success</span></td><td class="mini">yesterday</td><td class="mini">210</td><td><span class="kebab">⋮</span></td></tr>
+              </tbody>
+            </table>
+            <div class="tbl-foot">
+              <span>Showing 1–16 of 42 pipelines</span>
+              <div class="pager">
+                <span class="pg active">1</span><span class="pg">2</span><span class="pg">3</span><span class="pg">›</span>
               </div>
             </div>
           </div>
         </div>
-      </section>
 
-      <!-- ================= VIEW 4: RIGHT RAIL ================= -->
-      <section class="view" data-view="4">
-        <div class="page-head"><h1>CI Overview</h1></div>
-        <p class="view-note"><b>Persistent but ignorable.</b> A collapsible side panel. Always there for the curious, one click to fold into a thin tab for everyone else.</p>
-
-        <div class="two-col">
-          <div class="col-main">
-            <div class="blk"><h3>Build throughput</h3><div class="bar w85"></div><div class="bar w70"></div><div class="bar w50"></div><div class="bar w40"></div></div>
-            <div class="blk"><h3>Recent executions</h3><div class="bar w70"></div><div class="bar w85"></div><div class="bar w50"></div></div>
-            <div class="blk"><h3>Test Intelligence</h3><div class="bar w50"></div><div class="bar w70"></div></div>
+        <!-- ===== RIGHT: Feature Feed rail (2 cards + View more) ===== -->
+        <aside class="rail" id="rail">
+          <div class="rail-head">
+            <span class="spark">✨</span>
+            <h3>What's new in CI</h3>
+            <span class="rail-collapsed-badge">What's new</span>
+            <span class="rc" id="railToggle" title="Collapse">⟩</span>
           </div>
 
-          <aside class="rail" id="rail">
-            <div class="rail-head">
-              <span class="spark">✨</span>
-              <h3>What's new in CI</h3>
-              <span class="rail-collapsed-badge">What's new</span>
-              <span class="rc" id="railToggle" title="Collapse">⟩</span>
+          <div class="fcard" data-card="c1">
+            <span class="fc-x" title="Dismiss">✕</span>
+            <div class="fc-eyebrow"><span class="bdg new">New</span><span class="mod">CI</span><span class="dt">2d ago</span></div>
+            <h4>Pipeline Caching Enhancements</h4>
+            <p>Cut build times with selective caching &amp; smarter cache restoration.</p>
+            <div class="chips"><span class="chip">Performance</span><span class="chip">⚑ Feature Flag</span></div>
+            <div class="fc-cta">
+              <button class="btn btn-green btn-sm js-ff" data-flag="CI_CACHE_INTELLIGENCE" data-title="Pipeline Caching Enhancements">⚑ Enable FF</button>
+              <a href="#" class="btn btn-ghost btn-sm js-docs">Docs</a>
             </div>
-            <div class="rail-item">
-              <div class="top"><span class="bdg new">New</span><span class="dt">2d ago</span></div>
-              <h5>Pipeline Caching Enhancements</h5>
-              <p>Selective caching &amp; smarter restoration for faster builds.</p>
-              <div class="mini-cta">
-                <button class="btn btn-green btn-sm js-ff" data-flag="CI_CACHE_INTELLIGENCE" data-title="Pipeline Caching Enhancements">⚑ Enable FF</button>
-                <a href="#" class="btn btn-ghost btn-sm js-docs">Docs</a>
-              </div>
-            </div>
-            <div class="rail-item">
-              <div class="top"><span class="bdg new">New</span><span class="dt">5d ago</span></div>
-              <h5>Custom Quality Gates</h5>
-              <p>Enforce coverage &amp; security thresholds on every build.</p>
-              <div class="mini-cta">
-                <button class="btn btn-green btn-sm js-ff" data-flag="CI_CUSTOM_QUALITY_GATES" data-title="Custom Quality Gates">⚑ Enable FF</button>
-                <a href="#" class="btn btn-ghost btn-sm js-docs">Docs</a>
-              </div>
-            </div>
-            <div class="rail-item">
-              <div class="top"><span class="bdg imp">Improved</span><span class="dt">1w ago</span></div>
-              <h5>Matrix Strategy for Stages</h5>
-              <p>Fan out a stage across OS/version combos in one config.</p>
-            </div>
-            <div class="rail-foot"><a href="#" class="js-viewall">View all in Engagement Hub →</a></div>
-          </aside>
-        </div>
-      </section>
+          </div>
 
+          <div class="fcard" data-card="c2">
+            <span class="fc-x" title="Dismiss">✕</span>
+            <div class="fc-eyebrow"><span class="bdg new">New</span><span class="mod">CI</span><span class="dt">5d ago</span></div>
+            <h4>Custom Quality Gates</h4>
+            <p>Fail pipelines on your own policy thresholds: coverage, vulnerabilities, or custom metrics.</p>
+            <div class="chips"><span class="chip">Quality</span><span class="chip">⚑ Feature Flag</span></div>
+            <div class="fc-cta">
+              <button class="btn btn-green btn-sm js-ff" data-flag="CI_CUSTOM_QUALITY_GATES" data-title="Custom Quality Gates">⚑ Enable FF</button>
+              <a href="#" class="btn btn-ghost btn-sm js-docs">Docs</a>
+            </div>
+          </div>
+
+          <div class="rail-foot">
+            <button class="btn btn-ghost btn-sm js-viewmore">View 6 more updates for CI →</button>
+          </div>
+        </aside>
+      </div>
     </div>
   </div>
 </div>
@@ -518,24 +336,6 @@
     setTimeout(()=>t.remove(),2600);
   }
 
-  // ----- demo switcher -----
-  const seg=document.getElementById('seg');
-  const views=[...document.querySelectorAll('.view')];
-  const navOverview=document.getElementById('navOverview');
-  const navPipelines=document.getElementById('navPipelines');
-  const crumbLeaf=document.getElementById('crumbLeaf');
-  function showView(v){
-    views.forEach(s=>s.classList.toggle('active', s.dataset.view===v));
-    [...seg.children].forEach(b=>b.classList.toggle('active', b.dataset.v===v));
-    // reflect the fake nav context so the shell feels real
-    const onOverview = (v==='2'||v==='4');
-    navOverview.classList.toggle('active', onOverview);
-    navPipelines.classList.toggle('active', !onOverview);
-    crumbLeaf.textContent = (v==='3') ? 'Pipeline: build-and-push-service' : 'Project: Default Project';
-    window.scrollTo(0,0);
-  }
-  seg.addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) showView(b.dataset.v); });
-
   // ----- Enable FF (shared dialog) -----
   const ffModal=document.getElementById('ffModal');
   let ffBtn=null;
@@ -551,25 +351,20 @@
     ffModal.classList.remove('open');
     const flag=document.getElementById('ffKey').textContent;
     if(ffBtn){
-      const holder=ffBtn.closest('.fc-cta')||ffBtn.closest('.cc-cta')||ffBtn.closest('.mini-cta');
-      if(holder) holder.innerHTML='<span class="ff-enabled-inline">✓ Feature flag enabled for satwell-demo</span>';
+      const holder=ffBtn.closest('.fc-cta');
+      if(holder) holder.outerHTML='<span class="ff-enabled-inline">✓ Feature flag enabled for satwell-demo</span>';
     }
     toast('Feature flag <b style="margin-left:3px">'+flag+'</b> enabled');
   });
 
-  // ----- docs / view all (mock) -----
+  // ----- docs / view more (mock) -----
   document.querySelectorAll('.js-docs').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); toast('Opening documentation ↗'); }));
-  document.querySelectorAll('.js-viewall').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); toast('Opening Engagement Hub → What\'s New ↗'); }));
+  document.querySelector('.js-viewmore').addEventListener('click', ()=> toast('Opening Engagement Hub → What\'s New ↗'));
 
-  // ----- dismiss (empty-state cards + callout) -----
-  document.querySelectorAll('.fc-x').forEach(x=>x.addEventListener('click', ()=>{ x.closest('.fcard').style.display='none'; }));
-  const callout3=document.getElementById('callout3');
-  callout3.querySelector('.cx').addEventListener('click', ()=>{ callout3.style.display='none'; toast('Dismissed — won\'t show again'); });
+  // ----- dismiss a feature card -----
+  document.querySelectorAll('.fc-x').forEach(x=>x.addEventListener('click', ()=>{ x.closest('.fcard').style.display='none'; toast('Dismissed — won\'t show again'); }));
 
-  // ----- caching toggle (view 3) -----
-  document.getElementById('cacheTg').addEventListener('click', function(){ this.classList.toggle('on'); });
-
-  // ----- right rail collapse (view 4) -----
+  // ----- right rail collapse -----
   const rail=document.getElementById('rail');
   document.getElementById('railToggle').addEventListener('click', function(){
     const collapsed=rail.classList.toggle('collapsed');
@@ -577,6 +372,8 @@
     this.title = collapsed ? 'Expand' : 'Collapse';
   });
 
+  // ----- misc demo clickables -----
+  document.querySelectorAll('.p-name').forEach(p=>p.addEventListener('click', ()=>toast('Opening pipeline ↗')));
   document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ ffModal.classList.remove('open'); }});
 </script>
 </body>
